@@ -1,0 +1,2360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kiambogo Township Primary School — Management System</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --green-dark: #0a3d1f;
+    --green-mid: #1a6b37;
+    --green-light: #2d9e56;
+    --green-pale: #e8f5ee;
+    --gold: #c9922a;
+    --gold-light: #f7ecd3;
+    --red: #b91c1c;
+    --red-light: #fee2e2;
+    --blue: #1e40af;
+    --blue-light: #dbeafe;
+    --gray-900: #111827;
+    --gray-700: #374151;
+    --gray-500: #6b7280;
+    --gray-300: #d1d5db;
+    --gray-100: #f3f4f6;
+    --white: #ffffff;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: #f0f4f1; color: var(--gray-900); min-height: 100vh; }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-mid) 100%);
+    color: white; padding: 0;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-inner { display: flex; align-items: center; padding: 14px 24px; gap: 16px; }
+  .school-crest {
+    width: 56px; height: 56px; background: var(--gold);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700;
+    color: white; flex-shrink: 0; border: 3px solid rgba(255,255,255,0.3);
+  }
+  .school-info h1 { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; letter-spacing: 0.3px; }
+  .school-info p { font-size: 12px; opacity: 0.8; margin-top: 2px; }
+  .header-stats { margin-left: auto; display: flex; gap: 20px; }
+  .hstat { text-align: center; }
+  .hstat-num { font-size: 20px; font-weight: 600; font-family: 'Playfair Display', serif; color: var(--gold); }
+  .hstat-label { font-size: 11px; opacity: 0.7; }
+
+  /* NAV */
+  .nav { background: var(--green-dark); display: flex; border-top: 1px solid rgba(255,255,255,0.1); overflow-x: auto; }
+  .nav-btn {
+    background: none; border: none; color: rgba(255,255,255,0.7);
+    padding: 12px 20px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; transition: all 0.2s;
+  }
+  .nav-btn:hover { color: white; background: rgba(255,255,255,0.05); }
+  .nav-btn.active { color: var(--gold); border-bottom-color: var(--gold); background: rgba(201,146,42,0.1); }
+
+  .main { padding: 24px; max-width: 1200px; margin: 0 auto; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* CARDS */
+  .card {
+    background: white; border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 24px; margin-bottom: 20px; border: 1px solid rgba(0,0,0,0.04);
+  }
+  .card-title {
+    font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600;
+    color: var(--green-dark); margin-bottom: 18px; padding-bottom: 12px;
+    border-bottom: 2px solid var(--green-pale); display: flex; align-items: center; gap: 8px;
+  }
+
+  /* FORMS */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-grid.three { grid-template-columns: 1fr 1fr 1fr; }
+  .form-grid.four { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+  label { font-size: 13px; font-weight: 500; color: var(--gray-700); }
+  .required::after { content: ' *'; color: var(--red); }
+  input, select, textarea {
+    border: 1.5px solid var(--gray-300); border-radius: 7px; padding: 10px 12px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--gray-900);
+    background: white; transition: border-color 0.2s; width: 100%;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none; border-color: var(--green-mid); box-shadow: 0 0 0 3px rgba(45,158,86,0.12);
+  }
+
+  /* BUTTONS */
+  .btn {
+    padding: 10px 20px; border: none; border-radius: 7px; font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-primary { background: var(--green-mid); color: white; }
+  .btn-primary:hover { background: var(--green-dark); transform: translateY(-1px); }
+  .btn-gold { background: var(--gold); color: white; }
+  .btn-gold:hover { background: #a67520; }
+  .btn-outline { background: none; border: 1.5px solid var(--green-mid); color: var(--green-mid); }
+  .btn-outline:hover { background: var(--green-pale); }
+  .btn-danger { background: var(--red); color: white; }
+  .btn-danger:hover { background: #991b1b; }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+  .btn-actions { display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th {
+    background: var(--green-pale); color: var(--green-dark); font-weight: 600; font-size: 12px;
+    text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 14px; text-align: left;
+    border-bottom: 2px solid var(--green-light);
+  }
+  td { padding: 12px 14px; border-bottom: 1px solid var(--gray-100); vertical-align: middle; }
+  tr:hover td { background: #fafffe; }
+  tr:last-child td { border-bottom: none; }
+
+  /* BADGES */
+  .badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+  .badge-green { background: var(--green-pale); color: var(--green-dark); }
+  .badge-gold { background: var(--gold-light); color: #7a5415; }
+  .badge-red { background: var(--red-light); color: var(--red); }
+  .badge-blue { background: var(--blue-light); color: var(--blue); }
+  .badge-gray { background: var(--gray-100); color: var(--gray-700); }
+
+  /* SEARCH */
+  .search-bar { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+  .search-bar input { flex: 1; min-width: 200px; }
+  .search-bar select { width: auto; min-width: 140px; }
+
+  /* DASHBOARD STATS */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 24px; }
+  .stat-card {
+    background: white; border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow);
+    border-left: 4px solid var(--green-mid); border-top: none; border-right: none; border-bottom: none;
+  }
+  .stat-card.gold { border-left-color: var(--gold); }
+  .stat-card.red { border-left-color: var(--red); }
+  .stat-num { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; color: var(--green-dark); line-height: 1; }
+  .stat-card.gold .stat-num { color: var(--gold); }
+  .stat-card.red .stat-num { color: var(--red); }
+  .stat-label { font-size: 12px; color: var(--gray-500); margin-top: 6px; }
+
+  /* STATEMENT */
+  .statement-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+  .statement-school-name { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--green-dark); }
+  .statement-sub { font-size: 12px; color: var(--gray-500); }
+  .statement-learner {
+    background: var(--green-pale); border-radius: var(--radius); padding: 16px 20px;
+    margin-bottom: 20px; display: flex; gap: 24px; flex-wrap: wrap;
+  }
+  .sl-item label { font-size: 11px; color: var(--gray-500); display: block; }
+  .sl-item span { font-size: 14px; font-weight: 500; color: var(--green-dark); }
+  .statement-total {
+    display: flex; justify-content: flex-end; gap: 40px; margin-top: 16px;
+    padding-top: 16px; border-top: 2px solid var(--green-light); flex-wrap: wrap;
+  }
+  .total-item { text-align: right; }
+  .total-item label { font-size: 12px; color: var(--gray-500); display: block; }
+  .total-item .amount { font-size: 20px; font-weight: 700; }
+  .amount.green { color: var(--green-mid); }
+  .amount.red { color: var(--red); }
+  .amount.gold { color: var(--gold); }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    z-index: 1000; align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: white; border-radius: 12px; padding: 28px; max-width: 560px; width: 100%;
+    max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  }
+  .modal-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--green-dark); margin-bottom: 20px; }
+
+  /* ALERTS */
+  .alert { padding: 12px 16px; border-radius: 8px; font-size: 14px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .alert-success { background: var(--green-pale); color: var(--green-dark); }
+  .alert-error { background: var(--red-light); color: var(--red); }
+
+  /* PHOTO & DOCUMENT UPLOADS */
+  .uploads-row { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+  .upload-box {
+    display: flex; flex-direction: column; align-items: center; gap: 6px; flex-shrink: 0;
+  }
+  .upload-box label { font-size: 12px; font-weight: 600; color: var(--gray-700); }
+  .photo-box {
+    width: 90px; height: 110px; border: 2px dashed var(--gray-300); border-radius: 8px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    cursor: pointer; overflow: hidden; background: var(--gray-100); flex-shrink: 0;
+  }
+  .photo-box img { width: 100%; height: 100%; object-fit: cover; }
+  .photo-box span { font-size: 10px; color: var(--gray-500); text-align: center; padding: 4px; }
+  .bc-box {
+    width: 130px; height: 110px; border: 2px dashed var(--blue); border-radius: 8px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    cursor: pointer; overflow: hidden; background: var(--blue-light); flex-shrink: 0;
+    position: relative;
+  }
+  .bc-box img { width: 100%; height: 100%; object-fit: cover; }
+  .bc-box span { font-size: 10px; color: var(--blue); text-align: center; padding: 4px; }
+  .bc-box .bc-view-btn {
+    position: absolute; bottom: 4px; right: 4px;
+    background: var(--blue); color: white; font-size: 10px;
+    border: none; border-radius: 4px; padding: 2px 6px; cursor: pointer; display: none;
+  }
+  .bc-box:hover .bc-view-btn { display: block; }
+
+  .learner-profile-row { display: flex; gap: 20px; align-items: flex-start; }
+
+  /* FEE SETTINGS */
+  .fee-category-block {
+    border: 1.5px solid var(--gray-200); border-radius: 10px; margin-bottom: 18px; overflow: hidden;
+  }
+  .fee-category-header {
+    background: var(--green-pale); padding: 12px 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .fee-category-header strong { font-size: 14px; color: var(--green-dark); }
+  .fee-category-header span { font-size: 12px; color: var(--gray-500); }
+  .fee-fields { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; }
+  .fee-field {
+    padding: 14px 16px; border-right: 1px solid var(--gray-100); display: flex; flex-direction: column; gap: 6px;
+  }
+  .fee-field:last-child { border-right: none; }
+  .fee-field label { font-size: 12px; font-weight: 600; color: var(--gray-700); }
+  .fee-field .fee-sub { font-size: 11px; color: var(--gray-500); }
+  .fee-total-row {
+    background: var(--gray-100); padding: 10px 16px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 13px; border-top: 1px solid var(--gray-200);
+  }
+
+  /* PAYMENT BREAKDOWN */
+  .payment-breakdown {
+    background: var(--green-pale); border-radius: 10px; padding: 16px; margin-bottom: 16px;
+  }
+  .payment-breakdown h4 { font-size: 13px; font-weight: 600; color: var(--green-dark); margin-bottom: 12px; }
+  .fee-breakdown-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .fee-breakdown-item { display: flex; flex-direction: column; gap: 4px; }
+  .fee-breakdown-item label { font-size: 11px; color: var(--gray-500); }
+  .fee-breakdown-item input { font-size: 14px; }
+  .fee-expected { font-size: 11px; color: var(--gray-500); margin-top: 2px; }
+
+  /* INFO BOX */
+  .info-box {
+    background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 8px;
+    padding: 12px 16px; font-size: 13px; color: var(--green-dark);
+    display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap;
+  }
+  .info-box .info-item { display: flex; flex-direction: column; gap: 2px; }
+  .info-box .info-label { font-size: 11px; color: var(--gray-500); }
+  .info-box .info-val { font-size: 13px; font-weight: 600; }
+  .info-box .info-val.red { color: var(--red); }
+  .info-box .info-val.green { color: var(--green-mid); }
+
+  /* EMPTY */
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--gray-500); }
+  .empty-state .emoji { font-size: 40px; }
+  .empty-state p { margin-top: 10px; }
+
+  /* ID CARD */
+  .id-card { width: 340px; border: 2px solid var(--green-mid); border-radius: 12px; overflow: hidden; font-size: 13px; box-shadow: var(--shadow); background: white; }
+  .id-card-header { background: linear-gradient(135deg, var(--green-dark), var(--green-mid)); color: white; padding: 12px 16px; text-align: center; }
+  .id-card-header h3 { font-family: 'Playfair Display', serif; font-size: 14px; }
+  .id-card-header p { font-size: 10px; opacity: 0.8; }
+  .id-card-body { padding: 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .id-photo { width: 70px; height: 80px; border-radius: 6px; object-fit: cover; border: 2px solid var(--green-pale); background: var(--gray-100); display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; }
+  .id-details p { margin: 3px 0; font-size: 12px; }
+  .id-details strong { color: var(--green-dark); }
+  .id-card-footer { background: var(--green-pale); padding: 8px 16px; text-align: center; font-size: 11px; color: var(--green-dark); font-weight: 500; }
+
+  /* BC VIEWER MODAL */
+  #bcViewerModal img { max-width: 100%; border-radius: 8px; }
+
+  @media print {
+    .header, .nav, .no-print { display: none !important; }
+    .card { box-shadow: none; border: 1px solid #ccc; }
+    body { background: white; }
+    .main { padding: 10px; }
+  }
+  @media (max-width: 640px) {
+    .form-grid, .form-grid.three, .form-grid.four { grid-template-columns: 1fr; }
+    .fee-fields { grid-template-columns: 1fr; }
+    .fee-breakdown-grid { grid-template-columns: 1fr; }
+    .header-stats { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-inner">
+    <div class="school-crest">KTP</div>
+    <div class="school-info">
+      <h1>Kiambogo Township Primary School</h1>
+      <p>Kiambogo Shopping Centre &nbsp;|&nbsp; School Management System</p>
+    </div>
+    <div class="header-stats">
+      <div class="hstat">
+        <div class="hstat-num" id="hTotalLearners">0</div>
+        <div class="hstat-label">Learners</div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-num" id="hTotalFees">KES 0</div>
+        <div class="hstat-label">Fees Collected</div>
+      </div>
+    </div>
+  </div>
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showPage('dashboard', this)">📊 Dashboard</button>
+    <button class="nav-btn" onclick="showPage('admission', this)">📋 Admission</button>
+    <button class="nav-btn" onclick="showPage('learners', this)">👨‍🎓 Learners</button>
+    <button class="nav-btn" onclick="showPage('fees', this)">💳 Fees Payment</button>
+    <button class="nav-btn" onclick="showPage('statement', this)">📄 Statement</button>
+    <button class="nav-btn" onclick="showPage('exams', this)">📝 Exams</button>
+    <button class="nav-btn" onclick="showPage('settings', this)">⚙️ Settings</button>
+  </nav>
+</div>
+
+<div class="main">
+
+<!-- ========== DASHBOARD ========== -->
+<div id="page-dashboard" class="page active">
+  <div class="stats-grid" id="dashStats"></div>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+    <div class="card">
+      <div class="card-title">📊 Enrollment by Grade</div>
+      <div id="gradeBreakdown"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">💰 Fee Collection Summary</div>
+      <div id="feesSummary"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">🕐 Recently Admitted Learners</div>
+    <div id="recentLearners"></div>
+  </div>
+</div>
+
+<!-- ========== ADMISSION ========== -->
+<div id="page-admission" class="page">
+  <div class="card">
+    <div class="card-title">📋 Learner Admission Form</div>
+
+    <!-- Photo + BC Upload Row -->
+    <div class="uploads-row" style="margin-bottom:20px;">
+      <div class="upload-box">
+        <label>Passport Photo</label>
+        <div class="photo-box" onclick="document.getElementById('photoInput').click()" id="photoBox">
+          <span>📷<br>Click to add</span>
+        </div>
+        <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="loadImage(this,'photoData','photoBox','photo')">
+        <input type="hidden" id="photoData">
+      </div>
+
+      <div class="upload-box">
+        <label>Birth Certificate</label>
+        <div class="bc-box" onclick="document.getElementById('bcInput').click()" id="bcBox">
+          <span>📄<br>Click to upload<br>BC image</span>
+          <button class="bc-view-btn" onclick="event.stopPropagation(); viewBC()">👁 View</button>
+        </div>
+        <input type="file" id="bcInput" accept="image/*,application/pdf" style="display:none" onchange="loadImage(this,'bcData','bcBox','bc')">
+        <input type="hidden" id="bcData">
+      </div>
+
+      <div style="flex:1; min-width:280px;">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="required">First Name</label>
+            <input type="text" id="f_firstName" placeholder="e.g. John">
+          </div>
+          <div class="form-group">
+            <label>Middle Name</label>
+            <input type="text" id="f_middleName" placeholder="e.g. Kamau">
+          </div>
+          <div class="form-group">
+            <label class="required">Last Name / Surname</label>
+            <input type="text" id="f_lastName" placeholder="e.g. Mwangi">
+          </div>
+          <div class="form-group">
+            <label class="required">Year of Birth</label>
+            <input type="number" id="f_yob" placeholder="e.g. 2018" min="2000" max="2025">
+          </div>
+          <div class="form-group">
+            <label class="required">Gender</label>
+            <select id="f_gender">
+              <option value="">— Select —</option>
+              <option>Male</option><option>Female</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="required">Grade / Class</label>
+            <select id="f_grade"></select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="border-top:1px solid var(--gray-100); padding-top:16px;">
+      <div class="form-grid three">
+        <div class="form-group">
+          <label class="required">Admission Number</label>
+          <input type="text" id="f_admNo" placeholder="e.g. KTPS/2025/001">
+        </div>
+        <div class="form-group">
+          <label class="required">Admission Date</label>
+          <input type="date" id="f_admDate">
+        </div>
+        <div class="form-group">
+          <label>NEMIS Number</label>
+          <input type="text" id="f_nemis" placeholder="Optional">
+        </div>
+        <div class="form-group">
+          <label class="required">Parent / Guardian Name</label>
+          <input type="text" id="f_parentName" placeholder="Full name">
+        </div>
+        <div class="form-group">
+          <label class="required">Parent Contact</label>
+          <input type="tel" id="f_parentContact" placeholder="e.g. 0712345678">
+        </div>
+        <div class="form-group">
+          <label>Alt. Contact</label>
+          <input type="tel" id="f_altContact" placeholder="Optional">
+        </div>
+        <div class="form-group">
+          <label class="required">Home Area / Village</label>
+          <input type="text" id="f_homeArea" placeholder="e.g. Kiambogo">
+        </div>
+        <div class="form-group">
+          <label>Birth Certificate No.</label>
+          <input type="text" id="f_bcNo" placeholder="Optional">
+        </div>
+        <div class="form-group">
+          <label>Special Needs / Notes</label>
+          <input type="text" id="f_notes" placeholder="Optional">
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-actions">
+      <button class="btn btn-primary" onclick="saveLearner()">💾 Save Learner</button>
+      <button class="btn btn-outline" onclick="clearForm()">🔄 Clear Form</button>
+    </div>
+    <div id="admissionAlert"></div>
+  </div>
+</div>
+
+<!-- ========== LEARNERS LIST ========== -->
+<div id="page-learners" class="page">
+  <div class="card">
+    <div class="card-title">👨‍🎓 Registered Learners</div>
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="🔍 Search by name or admission number..." oninput="renderLearners()">
+      <select id="filterGrade" onchange="renderLearners()"><option value="">All Grades</option></select>
+      <select id="filterGender" onchange="renderLearners()">
+        <option value="">All Genders</option><option>Male</option><option>Female</option>
+      </select>
+      <button class="btn btn-outline btn-sm" onclick="exportCSV()">📥 Export CSV</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Adm No.</th><th>Learner Name</th><th>Grade</th><th>Gender</th>
+            <th>YOB</th><th>Parent</th><th>Contact</th><th>Home Area</th>
+            <th>BC</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="learnersTable"></tbody>
+      </table>
+    </div>
+    <div id="learnersEmpty" class="empty-state" style="display:none;">
+      <div class="emoji">🎒</div><p>No learners registered yet. Go to Admission to add learners.</p>
+    </div>
+    <div id="learnerCount" style="font-size:13px; color:var(--gray-500); margin-top:12px;"></div>
+  </div>
+</div>
+
+<!-- ========== FEES PAYMENT ========== -->
+<div id="page-fees" class="page">
+  <div class="card">
+    <div class="card-title">💳 Record Fee Payment</div>
+    <div class="form-grid four">
+      <div class="form-group full">
+        <label class="required">Select Learner</label>
+        <select id="fp_learner" onchange="loadLearnerFee()">
+          <option value="">— Select Learner —</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="required">Term</label>
+        <select id="fp_term" onchange="loadLearnerFee()">
+          <option>Term 1</option><option>Term 2</option><option>Term 3</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="required">Year</label>
+        <input type="number" id="fp_year" value="2025" min="2020" max="2040" onchange="loadLearnerFee()">
+      </div>
+      <div class="form-group">
+        <label class="required">Payment Date</label>
+        <input type="date" id="fp_date">
+      </div>
+      <div class="form-group">
+        <label>Payment Mode</label>
+        <select id="fp_mode">
+          <option>Cash</option><option>M-Pesa</option>
+          <option>Bank Transfer</option><option>Cheque</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Fee info -->
+    <div id="feeInfoBox" style="display:none; margin:12px 0;">
+      <div class="info-box" id="feeInfoContent"></div>
+    </div>
+
+    <!-- Fee breakdown inputs -->
+    <div class="payment-breakdown" id="paymentBreakdown" style="display:none;">
+      <h4>💰 Amount Breakdown — Enter what is being paid for each item</h4>
+      <div class="fee-breakdown-grid">
+        <div class="fee-breakdown-item">
+          <label>Term Fee (KES)</label>
+          <input type="number" id="fp_termfee" placeholder="0" min="0" oninput="calcTotal()">
+          <div class="fee-expected" id="exp_termfee"></div>
+        </div>
+        <div class="fee-breakdown-item">
+          <label>Examination Fee (KES)</label>
+          <input type="number" id="fp_examfee" placeholder="0" min="0" oninput="calcTotal()">
+          <div class="fee-expected" id="exp_examfee"></div>
+        </div>
+        <div class="fee-breakdown-item">
+          <label>Activity Fee (KES)</label>
+          <input type="number" id="fp_actfee" placeholder="0" min="0" oninput="calcTotal()">
+          <div class="fee-expected" id="exp_actfee"></div>
+        </div>
+      </div>
+      <div style="margin-top:14px; padding-top:12px; border-top:1px solid rgba(0,0,0,0.08); display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+        <div>
+          <div style="font-size:12px; color:var(--gray-500);">Total Amount Being Paid</div>
+          <div id="fp_totalDisplay" style="font-size:22px; font-weight:700; color:var(--green-dark);">KES 0</div>
+        </div>
+        <div class="form-group" style="flex:1; min-width:160px;">
+          <label>Receipt / Ref No.</label>
+          <input type="text" id="fp_receipt" placeholder="Optional">
+        </div>
+        <div class="form-group" style="flex:1; min-width:160px;">
+          <label>Remarks</label>
+          <input type="text" id="fp_remarks" placeholder="Optional">
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-actions">
+      <button class="btn btn-primary" onclick="recordPayment()">✅ Record Payment</button>
+      <button class="btn btn-outline" onclick="clearFeeForm()">🔄 Clear</button>
+    </div>
+    <div id="paymentAlert"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📋 Payment Records</div>
+    <div class="search-bar">
+      <input type="text" id="paySearch" placeholder="🔍 Search payments..." oninput="renderPayments()">
+      <select id="payFilterTerm" onchange="renderPayments()">
+        <option value="">All Terms</option>
+        <option>Term 1</option><option>Term 2</option><option>Term 3</option>
+      </select>
+      <select id="payFilterYear" onchange="renderPayments()"></select>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th><th>Adm No.</th><th>Learner</th><th>Grade</th>
+            <th>Term/Year</th><th>Mode</th><th>Term Fee</th>
+            <th>Exam Fee</th><th>Activity Fee</th><th>Total</th><th>Del</th>
+          </tr>
+        </thead>
+        <tbody id="paymentsTable"></tbody>
+      </table>
+    </div>
+    <div id="paymentsEmpty" class="empty-state" style="display:none;">
+      <div class="emoji">💰</div><p>No payments recorded yet.</p>
+    </div>
+    <div id="paymentsTotals" style="margin-top:12px; text-align:right; font-size:14px; color:var(--gray-500);"></div>
+  </div>
+</div>
+
+<!-- ========== STATEMENT ========== -->
+<div id="page-statement" class="page">
+  <div class="card no-print">
+    <div class="card-title">📄 Generate Learner Statement</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Select Learner</label>
+        <select id="st_learner" onchange="generateStatement()">
+          <option value="">— Select Learner —</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Filter by Year (optional)</label>
+        <select id="st_year" onchange="generateStatement()">
+          <option value="">All Years</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div id="statementOutput"></div>
+</div>
+
+<!-- ========== EXAMS ========== -->
+<div id="page-exams" class="page">
+
+  <!-- Sub-tabs -->
+  <div style="display:flex; gap:0; margin-bottom:20px; background:white; border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; border:1px solid rgba(0,0,0,0.06);">
+    <button class="exam-tab active" id="etab-enter" onclick="switchExamTab('enter',this)" style="flex:1;padding:12px 10px;border:none;background:var(--green-mid);color:white;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border-right:1px solid rgba(255,255,255,0.2);">✍️ Enter Marks</button>
+    <button class="exam-tab" id="etab-results" onclick="switchExamTab('results',this)" style="flex:1;padding:12px 10px;border:none;background:white;color:var(--green-dark);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border-right:1px solid var(--gray-100);">📊 Class Results</button>
+    <button class="exam-tab" id="etab-report" onclick="switchExamTab('report',this)" style="flex:1;padding:12px 10px;border:none;background:white;color:var(--green-dark);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border-right:1px solid var(--gray-100);">📄 Report Card</button>
+    <button class="exam-tab" id="etab-analysis" onclick="switchExamTab('analysis',this)" style="flex:1;padding:12px 10px;border:none;background:white;color:var(--green-dark);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;">📈 Analysis</button>
+  </div>
+
+  <!-- ENTER MARKS -->
+  <div id="exam-panel-enter">
+    <div class="card">
+      <div class="card-title">✍️ Enter / Update Exam Marks</div>
+      <div class="form-grid four">
+        <div class="form-group">
+          <label class="required">Exam Name</label>
+          <input type="text" id="em_name" placeholder="e.g. Mid-Term Exam">
+        </div>
+        <div class="form-group">
+          <label class="required">Grade / Class</label>
+          <select id="em_grade" onchange="loadClassForMarks()">
+            <option value="">— Select Grade —</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="required">Term</label>
+          <select id="em_term">
+            <option>Term 1</option><option>Term 2</option><option>Term 3</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="required">Year</label>
+          <input type="number" id="em_year" min="2020" max="2040">
+        </div>
+        <div class="form-group">
+          <label class="required">Exam Date</label>
+          <input type="date" id="em_date">
+        </div>
+        <div class="form-group">
+          <label>Out of (Max Marks per subject)</label>
+          <select id="em_maxmarks">
+            <option value="100">100</option>
+            <option value="50">50</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="marksTableWrap" style="display:none; margin-top:20px;">
+        <div style="background:var(--green-pale); border-radius:8px; padding:12px 16px; margin-bottom:14px; font-size:13px; color:var(--green-dark);">
+          💡 <strong>Tip:</strong> Press <kbd style="background:white;border:1px solid #ccc;padding:1px 6px;border-radius:4px;">Tab</kbd> to move between cells. Leave blank if a subject was not taken.
+        </div>
+        <div class="table-wrap">
+          <table id="marksInputTable">
+            <thead id="marksInputHead"></thead>
+            <tbody id="marksInputBody"></tbody>
+          </table>
+        </div>
+        <div class="btn-actions">
+          <button class="btn btn-primary" onclick="saveExamMarks()">💾 Save All Marks</button>
+          <button class="btn btn-outline" onclick="clearMarksForm()">🔄 Clear</button>
+        </div>
+        <div id="examSaveAlert"></div>
+      </div>
+
+      <div id="marksEmptyMsg" class="empty-state" style="display:none; padding:20px;">
+        <div class="emoji">🎒</div><p>No learners found in this grade. Admit learners first.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLASS RESULTS -->
+  <div id="exam-panel-results" style="display:none;">
+    <div class="card">
+      <div class="card-title">📊 Class Results Sheet</div>
+      <div class="search-bar">
+        <select id="res_grade" onchange="renderResults()">
+          <option value="">— Select Grade —</option>
+        </select>
+        <select id="res_exam" onchange="renderResults()">
+          <option value="">— Select Exam —</option>
+        </select>
+        <button class="btn btn-outline btn-sm" onclick="window.print()">🖨️ Print Results</button>
+      </div>
+      <div id="resultsOutput">
+        <div class="empty-state"><div class="emoji">📊</div><p>Select a grade and exam to view results.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REPORT CARD -->
+  <div id="exam-panel-report" style="display:none;">
+    <div class="card no-print">
+      <div class="card-title">📄 Learner Report Card</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Select Learner</label>
+          <select id="rc_learner" onchange="renderReportCard()">
+            <option value="">— Select Learner —</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Filter by Exam (optional)</label>
+          <select id="rc_exam" onchange="renderReportCard()">
+            <option value="">All Exams This Grade</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div id="reportCardOutput"></div>
+  </div>
+
+  <!-- ANALYSIS -->
+  <div id="exam-panel-analysis" style="display:none;">
+    <div class="card">
+      <div class="card-title">📈 Subject & Grade Analysis</div>
+      <div class="search-bar">
+        <select id="an_grade" onchange="renderAnalysis()">
+          <option value="">— Select Grade —</option>
+        </select>
+        <select id="an_exam" onchange="renderAnalysis()">
+          <option value="">— Select Exam —</option>
+        </select>
+      </div>
+      <div id="analysisOutput">
+        <div class="empty-state"><div class="emoji">📈</div><p>Select a grade and exam to see subject analysis.</p></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ========== SETTINGS ========== -->
+<div id="page-settings" class="page">
+  <div class="card">
+    <div class="card-title">💰 Fee Configuration (Per Term)</div>
+    <p style="font-size:13px; color:var(--gray-500); margin-bottom:20px;">
+      Set Term Fee, Examination Fee and Activity Fee for each grade category. Totals are calculated automatically and used in payment recording and statements.
+    </p>
+
+    <!-- Category A -->
+    <div class="fee-category-block">
+      <div class="fee-category-header">
+        <strong>Category A — Early Years</strong>
+        <span>Play Group, PP1, PP2</span>
+      </div>
+      <div class="fee-fields">
+        <div class="fee-field">
+          <label>Term Fee (KES)</label>
+          <div class="fee-sub">Main tuition per term</div>
+          <input type="number" id="fee_a_term" placeholder="e.g. 8000" min="0" oninput="updateCatTotal('a')">
+        </div>
+        <div class="fee-field">
+          <label>Examination Fee (KES)</label>
+          <div class="fee-sub">Per examination period</div>
+          <input type="number" id="fee_a_exam" placeholder="e.g. 500" min="0" oninput="updateCatTotal('a')">
+        </div>
+        <div class="fee-field">
+          <label>Activity Fee (KES)</label>
+          <div class="fee-sub">Sports, trips, events</div>
+          <input type="number" id="fee_a_act" placeholder="e.g. 300" min="0" oninput="updateCatTotal('a')">
+        </div>
+      </div>
+      <div class="fee-total-row">
+        <span>Total per term for Category A:</span>
+        <strong id="fee_a_total" style="color:var(--green-dark);">KES 0</strong>
+      </div>
+    </div>
+
+    <!-- Category B -->
+    <div class="fee-category-block">
+      <div class="fee-category-header">
+        <strong>Category B — Lower Primary</strong>
+        <span>Grade 1, 2, 3, 4, 5</span>
+      </div>
+      <div class="fee-fields">
+        <div class="fee-field">
+          <label>Term Fee (KES)</label>
+          <div class="fee-sub">Main tuition per term</div>
+          <input type="number" id="fee_b_term" placeholder="e.g. 10000" min="0" oninput="updateCatTotal('b')">
+        </div>
+        <div class="fee-field">
+          <label>Examination Fee (KES)</label>
+          <div class="fee-sub">Per examination period</div>
+          <input type="number" id="fee_b_exam" placeholder="e.g. 700" min="0" oninput="updateCatTotal('b')">
+        </div>
+        <div class="fee-field">
+          <label>Activity Fee (KES)</label>
+          <div class="fee-sub">Sports, trips, events</div>
+          <input type="number" id="fee_b_act" placeholder="e.g. 400" min="0" oninput="updateCatTotal('b')">
+        </div>
+      </div>
+      <div class="fee-total-row">
+        <span>Total per term for Category B:</span>
+        <strong id="fee_b_total" style="color:var(--green-dark);">KES 0</strong>
+      </div>
+    </div>
+
+    <!-- Category C -->
+    <div class="fee-category-block">
+      <div class="fee-category-header">
+        <strong>Category C — Upper Primary</strong>
+        <span>Grade 6, 7, 8, 9</span>
+      </div>
+      <div class="fee-fields">
+        <div class="fee-field">
+          <label>Term Fee (KES)</label>
+          <div class="fee-sub">Main tuition per term</div>
+          <input type="number" id="fee_c_term" placeholder="e.g. 12000" min="0" oninput="updateCatTotal('c')">
+        </div>
+        <div class="fee-field">
+          <label>Examination Fee (KES)</label>
+          <div class="fee-sub">Per examination period</div>
+          <input type="number" id="fee_c_exam" placeholder="e.g. 1000" min="0" oninput="updateCatTotal('c')">
+        </div>
+        <div class="fee-field">
+          <label>Activity Fee (KES)</label>
+          <div class="fee-sub">Sports, trips, events</div>
+          <input type="number" id="fee_c_act" placeholder="e.g. 500" min="0" oninput="updateCatTotal('c')">
+        </div>
+      </div>
+      <div class="fee-total-row">
+        <span>Total per term for Category C:</span>
+        <strong id="fee_c_total" style="color:var(--green-dark);">KES 0</strong>
+      </div>
+    </div>
+
+    <div class="btn-actions">
+      <button class="btn btn-primary" onclick="saveFeeConfig()">💾 Save Fee Configuration</button>
+    </div>
+    <div id="feeConfigAlert"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📅 Academic Year Settings</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Current Academic Year</label>
+        <input type="number" id="set_year" placeholder="e.g. 2025" min="2020" max="2040">
+      </div>
+      <div class="form-group">
+        <label>Current Term</label>
+        <select id="set_term">
+          <option>Term 1</option><option>Term 2</option><option>Term 3</option>
+        </select>
+      </div>
+    </div>
+    <div class="btn-actions">
+      <button class="btn btn-primary" onclick="saveAcademicSettings()">💾 Save Settings</button>
+    </div>
+    <div id="academicAlert"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🗑️ Data Management</div>
+    <p style="font-size:13px; color:var(--gray-500); margin-bottom:16px;">All data is saved locally on this computer. Use these options carefully.</p>
+    <div class="btn-actions">
+      <button class="btn btn-outline" onclick="backupData()">📦 Backup Data (JSON)</button>
+      <button class="btn btn-outline" onclick="document.getElementById('restoreInput').click()">📂 Restore Backup</button>
+      <input type="file" id="restoreInput" accept=".json" style="display:none" onchange="restoreData(this)">
+      <button class="btn btn-danger" onclick="if(confirm('⚠️ This will DELETE ALL data. Are you sure?')) clearAllData()">🗑️ Clear All Data</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<!-- EDIT LEARNER MODAL -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-title">✏️ Edit Learner</div>
+    <input type="hidden" id="edit_id">
+    <div class="form-grid">
+      <div class="form-group"><label class="required">First Name</label><input type="text" id="edit_firstName"></div>
+      <div class="form-group"><label>Middle Name</label><input type="text" id="edit_middleName"></div>
+      <div class="form-group"><label class="required">Last Name</label><input type="text" id="edit_lastName"></div>
+      <div class="form-group"><label>Year of Birth</label><input type="number" id="edit_yob"></div>
+      <div class="form-group">
+        <label>Gender</label>
+        <select id="edit_gender"><option>Male</option><option>Female</option></select>
+      </div>
+      <div class="form-group"><label>Grade</label><select id="edit_grade"></select></div>
+      <div class="form-group"><label>Parent Name</label><input type="text" id="edit_parentName"></div>
+      <div class="form-group"><label>Parent Contact</label><input type="tel" id="edit_parentContact"></div>
+      <div class="form-group"><label>Home Area</label><input type="text" id="edit_homeArea"></div>
+      <div class="form-group"><label>BC No.</label><input type="text" id="edit_bcNo"></div>
+      <div class="form-group"><label>NEMIS No.</label><input type="text" id="edit_nemis"></div>
+      <div class="form-group"><label>Notes</label><input type="text" id="edit_notes"></div>
+    </div>
+    <div class="btn-actions">
+      <button class="btn btn-primary" onclick="updateLearner()">💾 Update</button>
+      <button class="btn btn-outline" onclick="closeModal('editModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ID CARD MODAL -->
+<div class="modal-overlay" id="idCardModal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-title">🪪 Learner ID Card</div>
+    <div id="idCardContent" style="display:flex; justify-content:center; margin-bottom:20px;"></div>
+    <div class="btn-actions">
+      <button class="btn btn-primary" onclick="window.print()">🖨️ Print</button>
+      <button class="btn btn-outline" onclick="closeModal('idCardModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- BC VIEWER MODAL -->
+<div class="modal-overlay" id="bcViewerModal">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-title">📄 Birth Certificate</div>
+    <div id="bcViewerContent" style="margin-bottom:20px;"></div>
+    <div class="btn-actions">
+      <button class="btn btn-outline" onclick="closeModal('bcViewerModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// =========================================================
+// DATA LAYER
+// =========================================================
+const GRADES = ['Play Group','PP1','PP2','Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6','Grade 7','Grade 8','Grade 9'];
+const GRADE_CAT = {
+  'Play Group':'a','PP1':'a','PP2':'a',
+  'Grade 1':'b','Grade 2':'b','Grade 3':'b','Grade 4':'b','Grade 5':'b',
+  'Grade 6':'c','Grade 7':'c','Grade 8':'c','Grade 9':'c'
+};
+
+function load(key, def) {
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch { return def; }
+}
+function save(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+let learners = load('ktps_learners', []);
+let payments = load('ktps_payments', []);
+let feeConfig = load('ktps_fees', { a:{term:0,exam:0,act:0}, b:{term:0,exam:0,act:0}, c:{term:0,exam:0,act:0} });
+let academicSettings = load('ktps_academic', { year: new Date().getFullYear(), term: 'Term 1' });
+
+function persist() { save('ktps_learners', learners); save('ktps_payments', payments); }
+
+function catTotal(cat) {
+  const f = feeConfig[cat] || {};
+  return (f.term||0) + (f.exam||0) + (f.act||0);
+}
+
+// =========================================================
+// INIT
+// =========================================================
+window.onload = function() {
+  populateGradeSelects();
+  setTodayDates();
+  loadFeeConfigUI();
+  loadAcademicSettings();
+  renderDashboard();
+  renderLearners();
+  renderPayments();
+  populateLearnerSelects();
+  populateYearFilters();
+  updateHeaderStats();
+};
+
+function populateGradeSelects() {
+  ['f_grade','edit_grade','filterGrade'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const hasAll = id === 'filterGrade';
+    el.innerHTML = (hasAll ? '<option value="">All Grades</option>' : '<option value="">— Select Grade —</option>') +
+      GRADES.map(g => `<option>${g}</option>`).join('');
+  });
+}
+
+function setTodayDates() {
+  const today = new Date().toISOString().split('T')[0];
+  const d = document.getElementById('f_admDate'); if (d) d.value = today;
+  const fd = document.getElementById('fp_date'); if (fd) fd.value = today;
+  const fy = document.getElementById('fp_year'); if (fy) fy.value = academicSettings.year;
+}
+
+function populateLearnerSelects() {
+  ['fp_learner','st_learner'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const sorted = [...learners].sort((a,b) => a.lastName.localeCompare(b.lastName));
+    el.innerHTML = `<option value="">— Select Learner —</option>` +
+      sorted.map(l => `<option value="${l.id}">${l.admNo} — ${fullName(l)} (${l.grade})</option>`).join('');
+  });
+}
+
+function populateYearFilters() {
+  const years = new Set(payments.map(p => p.year));
+  years.add(new Date().getFullYear());
+  years.add(academicSettings.year);
+  const sorted = [...years].sort((a,b) => b - a);
+  ['st_year','payFilterYear'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const isFilter = id === 'payFilterYear';
+    el.innerHTML = (isFilter ? '<option value="">All Years</option>' : '<option value="">All Years</option>') +
+      sorted.map(y => `<option>${y}</option>`).join('');
+  });
+}
+
+function fullName(l) { return [l.firstName, l.middleName, l.lastName].filter(Boolean).join(' '); }
+
+function updateHeaderStats() {
+  document.getElementById('hTotalLearners').textContent = learners.length;
+  const total = payments.reduce((s, p) => s + (parseFloat(p.termfee)||0) + (parseFloat(p.examfee)||0) + (parseFloat(p.actfee)||0), 0);
+  document.getElementById('hTotalFees').textContent = 'KES ' + total.toLocaleString();
+}
+
+// =========================================================
+// NAVIGATION
+// =========================================================
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (name === 'learners') renderLearners();
+  if (name === 'fees') { renderPayments(); populateLearnerSelects(); }
+  if (name === 'statement') { populateLearnerSelects(); populateYearFilters(); generateStatement(); }
+  if (name === 'dashboard') renderDashboard();
+  if (name === 'settings') loadFeeConfigUI();
+  if (name === 'exams') initExamsPage();
+}
+
+// =========================================================
+// IMAGE UPLOADS
+// =========================================================
+function loadImage(input, dataId, boxId, type) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById(dataId).value = e.target.result;
+    const box = document.getElementById(boxId);
+    if (type === 'photo') {
+      box.innerHTML = `<img src="${e.target.result}" alt="Photo">`;
+    } else {
+      box.innerHTML = `<img src="${e.target.result}" alt="BC"><button class="bc-view-btn" onclick="event.stopPropagation(); viewBC()">👁 View</button>`;
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function viewBC(data) {
+  const src = data || document.getElementById('bcData').value;
+  if (!src) return;
+  document.getElementById('bcViewerContent').innerHTML = `<img src="${src}" style="max-width:100%; border-radius:8px;" alt="Birth Certificate">`;
+  document.getElementById('bcViewerModal').classList.add('open');
+}
+
+// =========================================================
+// ADMISSION
+// =========================================================
+function saveLearner() {
+  const req = ['f_firstName','f_lastName','f_yob','f_gender','f_grade','f_admNo','f_admDate','f_parentName','f_parentContact'];
+  for (const id of req) {
+    if (!document.getElementById(id).value.trim()) {
+      showAlert('admissionAlert', '❌ Please fill all required fields (marked with *)', 'error');
+      document.getElementById(id).focus(); return;
+    }
+  }
+  const admNo = document.getElementById('f_admNo').value.trim();
+  if (learners.find(l => l.admNo === admNo)) {
+    showAlert('admissionAlert', '❌ Admission number already exists. Use a unique number.', 'error'); return;
+  }
+
+  const learner = {
+    id: Date.now().toString(),
+    firstName: document.getElementById('f_firstName').value.trim(),
+    middleName: document.getElementById('f_middleName').value.trim(),
+    lastName: document.getElementById('f_lastName').value.trim(),
+    yob: document.getElementById('f_yob').value,
+    gender: document.getElementById('f_gender').value,
+    grade: document.getElementById('f_grade').value,
+    admNo,
+    admDate: document.getElementById('f_admDate').value,
+    parentName: document.getElementById('f_parentName').value.trim(),
+    parentContact: document.getElementById('f_parentContact').value.trim(),
+    altContact: document.getElementById('f_altContact').value.trim(),
+    homeArea: document.getElementById('f_homeArea').value.trim(),
+    bcNo: document.getElementById('f_bcNo').value.trim(),
+    nemis: document.getElementById('f_nemis').value.trim(),
+    notes: document.getElementById('f_notes').value.trim(),
+    photo: document.getElementById('photoData').value,
+    bcImage: document.getElementById('bcData').value,
+    registeredAt: new Date().toISOString()
+  };
+
+  learners.push(learner);
+  persist();
+  updateHeaderStats();
+  populateLearnerSelects();
+  populateYearFilters();
+  showAlert('admissionAlert', `✅ ${fullName(learner)} admitted successfully! Adm No: ${admNo}`, 'success');
+  clearForm();
+  renderDashboard();
+}
+
+function clearForm() {
+  ['f_firstName','f_middleName','f_lastName','f_yob','f_parentName','f_parentContact',
+   'f_altContact','f_homeArea','f_bcNo','f_nemis','f_notes','f_admNo','photoData','bcData'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.getElementById('f_gender').value = '';
+  document.getElementById('f_grade').value = '';
+  document.getElementById('photoBox').innerHTML = '<span>📷<br>Click to add</span>';
+  document.getElementById('bcBox').innerHTML = '<span>📄<br>Click to upload<br>BC image</span><button class="bc-view-btn" onclick="event.stopPropagation(); viewBC()">👁 View</button>';
+  document.getElementById('f_admDate').value = new Date().toISOString().split('T')[0];
+}
+
+// =========================================================
+// LEARNERS LIST
+// =========================================================
+function renderLearners() {
+  const search = (document.getElementById('searchInput')?.value || '').toLowerCase();
+  const grade = document.getElementById('filterGrade')?.value || '';
+  const gender = document.getElementById('filterGender')?.value || '';
+
+  let filtered = learners.filter(l => {
+    const name = fullName(l).toLowerCase();
+    const matchSearch = !search || name.includes(search) || l.admNo.toLowerCase().includes(search) || l.parentName.toLowerCase().includes(search);
+    return matchSearch && (!grade || l.grade === grade) && (!gender || l.gender === gender);
+  });
+  filtered.sort((a,b) => a.lastName.localeCompare(b.lastName));
+
+  const tbody = document.getElementById('learnersTable');
+  const empty = document.getElementById('learnersEmpty');
+  const count = document.getElementById('learnerCount');
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = ''; empty.style.display = 'block'; count.textContent = '';
+  } else {
+    empty.style.display = 'none';
+    count.textContent = `Showing ${filtered.length} of ${learners.length} learner(s)`;
+    tbody.innerHTML = filtered.map(l => `
+      <tr>
+        <td><strong>${l.admNo}</strong></td>
+        <td>
+          <div style="display:flex; align-items:center; gap:8px;">
+            ${l.photo ? `<img src="${l.photo}" style="width:30px;height:35px;border-radius:4px;object-fit:cover;">` : `<div style="width:30px;height:35px;border-radius:4px;background:var(--green-pale);display:flex;align-items:center;justify-content:center;font-size:16px;">👤</div>`}
+            <span>${fullName(l)}</span>
+          </div>
+        </td>
+        <td><span class="badge badge-green">${l.grade}</span></td>
+        <td>${l.gender}</td>
+        <td>${l.yob}</td>
+        <td>${l.parentName}</td>
+        <td>${l.parentContact}</td>
+        <td>${l.homeArea}</td>
+        <td>
+          ${l.bcImage
+            ? `<button class="btn btn-outline btn-sm" style="border-color:var(--blue);color:var(--blue);" onclick="viewBC('${l.bcImage.substring(0,30)}...' || ''); viewBCFromLearner('${l.id}')">📄 View</button>`
+            : '<span style="color:var(--gray-300); font-size:12px;">—</span>'}
+        </td>
+        <td>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-outline btn-sm" onclick="editLearner('${l.id}')">✏️</button>
+            <button class="btn btn-outline btn-sm" onclick="showIdCard('${l.id}')">🪪</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteLearner('${l.id}')">🗑️</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+}
+
+function viewBCFromLearner(id) {
+  const l = learners.find(x => x.id === id);
+  if (l && l.bcImage) viewBC(l.bcImage);
+}
+
+function deleteLearner(id) {
+  const l = learners.find(x => x.id === id);
+  if (!l) return;
+  if (!confirm(`Delete ${fullName(l)}? All payment records will also be removed.`)) return;
+  learners = learners.filter(x => x.id !== id);
+  payments = payments.filter(p => p.learnerId !== id);
+  persist(); updateHeaderStats(); populateLearnerSelects(); renderLearners(); renderDashboard();
+}
+
+function editLearner(id) {
+  const l = learners.find(x => x.id === id);
+  if (!l) return;
+  document.getElementById('edit_id').value = id;
+  document.getElementById('edit_firstName').value = l.firstName;
+  document.getElementById('edit_middleName').value = l.middleName || '';
+  document.getElementById('edit_lastName').value = l.lastName;
+  document.getElementById('edit_yob').value = l.yob;
+  document.getElementById('edit_gender').value = l.gender;
+  document.getElementById('edit_homeArea').value = l.homeArea;
+  document.getElementById('edit_parentName').value = l.parentName;
+  document.getElementById('edit_parentContact').value = l.parentContact;
+  document.getElementById('edit_bcNo').value = l.bcNo || '';
+  document.getElementById('edit_nemis').value = l.nemis || '';
+  document.getElementById('edit_notes').value = l.notes || '';
+  document.getElementById('edit_grade').innerHTML = GRADES.map(g => `<option${g===l.grade?' selected':''}>${g}</option>`).join('');
+  document.getElementById('editModal').classList.add('open');
+}
+
+function updateLearner() {
+  const id = document.getElementById('edit_id').value;
+  const idx = learners.findIndex(x => x.id === id);
+  if (idx < 0) return;
+  learners[idx] = {
+    ...learners[idx],
+    firstName: document.getElementById('edit_firstName').value.trim(),
+    middleName: document.getElementById('edit_middleName').value.trim(),
+    lastName: document.getElementById('edit_lastName').value.trim(),
+    yob: document.getElementById('edit_yob').value,
+    gender: document.getElementById('edit_gender').value,
+    grade: document.getElementById('edit_grade').value,
+    homeArea: document.getElementById('edit_homeArea').value.trim(),
+    parentName: document.getElementById('edit_parentName').value.trim(),
+    parentContact: document.getElementById('edit_parentContact').value.trim(),
+    bcNo: document.getElementById('edit_bcNo').value.trim(),
+    nemis: document.getElementById('edit_nemis').value.trim(),
+    notes: document.getElementById('edit_notes').value.trim(),
+  };
+  persist(); populateLearnerSelects(); renderLearners(); renderDashboard(); closeModal('editModal');
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// =========================================================
+// ID CARD
+// =========================================================
+function showIdCard(id) {
+  const l = learners.find(x => x.id === id);
+  if (!l) return;
+  const age = l.yob ? new Date().getFullYear() - parseInt(l.yob) : '?';
+  const photoHtml = l.photo
+    ? `<img src="${l.photo}" style="width:70px;height:80px;border-radius:6px;object-fit:cover;border:2px solid var(--green-pale);">`
+    : `<div class="id-photo">👤</div>`;
+  document.getElementById('idCardContent').innerHTML = `
+    <div class="id-card">
+      <div class="id-card-header">
+        <h3>Kiambogo Township Primary School</h3>
+        <p>Kiambogo Shopping Centre</p>
+      </div>
+      <div class="id-card-body">
+        ${photoHtml}
+        <div class="id-details">
+          <p><strong>${fullName(l)}</strong></p>
+          <p>Adm No: <strong>${l.admNo}</strong></p>
+          <p>Grade: <strong>${l.grade}</strong></p>
+          <p>Gender: ${l.gender} &nbsp;|&nbsp; Age: ${age} yrs</p>
+          <p>Parent: ${l.parentName}</p>
+          <p>Tel: ${l.parentContact}</p>
+        </div>
+      </div>
+      <div class="id-card-footer">Academic Year ${academicSettings.year} &nbsp;|&nbsp; ${academicSettings.term}</div>
+    </div>`;
+  document.getElementById('idCardModal').classList.add('open');
+}
+
+// =========================================================
+// FEES PAYMENT
+// =========================================================
+function loadLearnerFee() {
+  const id = document.getElementById('fp_learner').value;
+  const box = document.getElementById('feeInfoBox');
+  const breakdown = document.getElementById('paymentBreakdown');
+
+  if (!id) { box.style.display = 'none'; breakdown.style.display = 'none'; return; }
+
+  const l = learners.find(x => x.id === id);
+  if (!l) return;
+  const cat = GRADE_CAT[l.grade];
+  const cfg = feeConfig[cat] || {};
+  const term = document.getElementById('fp_term').value;
+  const year = parseInt(document.getElementById('fp_year').value);
+
+  const prevPays = payments.filter(p => p.learnerId === id && p.term === term && p.year === year);
+  const paidTerm = prevPays.reduce((s,p) => s + (parseFloat(p.termfee)||0), 0);
+  const paidExam = prevPays.reduce((s,p) => s + (parseFloat(p.examfee)||0), 0);
+  const paidAct  = prevPays.reduce((s,p) => s + (parseFloat(p.actfee)||0), 0);
+  const paidTotal = paidTerm + paidExam + paidAct;
+  const expectedTotal = catTotal(cat);
+  const balTotal = expectedTotal - paidTotal;
+
+  box.style.display = 'block';
+  document.getElementById('feeInfoContent').innerHTML = `
+    <div class="info-item"><div class="info-label">Learner</div><div class="info-val">${fullName(l)}</div></div>
+    <div class="info-item"><div class="info-label">Grade / Category</div><div class="info-val">${l.grade}</div></div>
+    <div class="info-item"><div class="info-label">Expected This Term</div><div class="info-val">KES ${expectedTotal.toLocaleString()}</div></div>
+    <div class="info-item"><div class="info-label">Already Paid</div><div class="info-val green">KES ${paidTotal.toLocaleString()}</div></div>
+    <div class="info-item"><div class="info-label">Outstanding Balance</div><div class="info-val ${balTotal > 0 ? 'red' : 'green'}">KES ${Math.abs(balTotal).toLocaleString()} ${balTotal <= 0 ? '✅' : ''}</div></div>
+  `;
+
+  breakdown.style.display = 'block';
+
+  // Set expected hints and pre-fill remaining balances
+  const balTerm = (cfg.term||0) - paidTerm;
+  const balExam = (cfg.exam||0) - paidExam;
+  const balAct  = (cfg.act||0) - paidAct;
+
+  document.getElementById('exp_termfee').textContent = cfg.term ? `Expected: KES ${(cfg.term||0).toLocaleString()} | Paid: KES ${paidTerm.toLocaleString()} | Bal: KES ${Math.max(0,balTerm).toLocaleString()}` : '';
+  document.getElementById('exp_examfee').textContent = cfg.exam ? `Expected: KES ${(cfg.exam||0).toLocaleString()} | Paid: KES ${paidExam.toLocaleString()} | Bal: KES ${Math.max(0,balExam).toLocaleString()}` : '';
+  document.getElementById('exp_actfee').textContent  = cfg.act  ? `Expected: KES ${(cfg.act||0).toLocaleString()}  | Paid: KES ${paidAct.toLocaleString()}  | Bal: KES ${Math.max(0,balAct).toLocaleString()}` : '';
+
+  // Pre-fill with remaining balance (if positive)
+  document.getElementById('fp_termfee').value = Math.max(0, balTerm) || '';
+  document.getElementById('fp_examfee').value = Math.max(0, balExam) || '';
+  document.getElementById('fp_actfee').value  = Math.max(0, balAct)  || '';
+  calcTotal();
+}
+
+function calcTotal() {
+  const t = parseFloat(document.getElementById('fp_termfee').value) || 0;
+  const e = parseFloat(document.getElementById('fp_examfee').value) || 0;
+  const a = parseFloat(document.getElementById('fp_actfee').value)  || 0;
+  document.getElementById('fp_totalDisplay').textContent = 'KES ' + (t+e+a).toLocaleString();
+}
+
+function recordPayment() {
+  const learnerId = document.getElementById('fp_learner').value;
+  if (!learnerId) { showAlert('paymentAlert', '❌ Please select a learner.', 'error'); return; }
+
+  const termfee = parseFloat(document.getElementById('fp_termfee').value) || 0;
+  const examfee = parseFloat(document.getElementById('fp_examfee').value) || 0;
+  const actfee  = parseFloat(document.getElementById('fp_actfee').value)  || 0;
+  const total = termfee + examfee + actfee;
+
+  if (total <= 0) { showAlert('paymentAlert', '❌ Please enter at least one fee amount greater than zero.', 'error'); return; }
+
+  const l = learners.find(x => x.id === learnerId);
+  const payment = {
+    id: Date.now().toString(),
+    learnerId,
+    learnerName: fullName(l),
+    admNo: l.admNo,
+    grade: l.grade,
+    term: document.getElementById('fp_term').value,
+    year: parseInt(document.getElementById('fp_year').value),
+    termfee, examfee, actfee,
+    date: document.getElementById('fp_date').value,
+    mode: document.getElementById('fp_mode').value,
+    receipt: document.getElementById('fp_receipt').value.trim(),
+    remarks: document.getElementById('fp_remarks').value.trim(),
+  };
+
+  payments.push(payment);
+  persist();
+  updateHeaderStats();
+  populateYearFilters();
+  renderPayments();
+  renderDashboard();
+  showAlert('paymentAlert', `✅ Payment of KES ${total.toLocaleString()} recorded for ${fullName(l)}.`, 'success');
+  clearFeeForm();
+}
+
+function clearFeeForm() {
+  document.getElementById('fp_learner').value = '';
+  ['fp_termfee','fp_examfee','fp_actfee','fp_receipt','fp_remarks'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('feeInfoBox').style.display = 'none';
+  document.getElementById('paymentBreakdown').style.display = 'none';
+  document.getElementById('fp_totalDisplay').textContent = 'KES 0';
+  document.getElementById('fp_date').value = new Date().toISOString().split('T')[0];
+}
+
+function renderPayments() {
+  const search = (document.getElementById('paySearch')?.value || '').toLowerCase();
+  const termFilter = document.getElementById('payFilterTerm')?.value || '';
+  const yearFilter = document.getElementById('payFilterYear')?.value || '';
+
+  let filtered = payments.filter(p => {
+    const matchSearch = !search || p.learnerName.toLowerCase().includes(search) || p.admNo.toLowerCase().includes(search);
+    return matchSearch && (!termFilter || p.term === termFilter) && (!yearFilter || p.year == yearFilter);
+  });
+  filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
+
+  const tbody = document.getElementById('paymentsTable');
+  const empty = document.getElementById('paymentsEmpty');
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = ''; empty.style.display = 'block';
+    document.getElementById('paymentsTotals').textContent = '';
+  } else {
+    empty.style.display = 'none';
+    const totTerm = filtered.reduce((s,p) => s + (parseFloat(p.termfee)||0), 0);
+    const totExam = filtered.reduce((s,p) => s + (parseFloat(p.examfee)||0), 0);
+    const totAct  = filtered.reduce((s,p) => s + (parseFloat(p.actfee)||0), 0);
+    const grand = totTerm + totExam + totAct;
+
+    tbody.innerHTML = filtered.map(p => {
+      const total = (parseFloat(p.termfee)||0) + (parseFloat(p.examfee)||0) + (parseFloat(p.actfee)||0);
+      return `
+        <tr>
+          <td>${formatDate(p.date)}</td>
+          <td>${p.admNo}</td>
+          <td>${p.learnerName}</td>
+          <td><span class="badge badge-green">${p.grade}</span></td>
+          <td>${p.term} ${p.year}</td>
+          <td><span class="badge badge-gold">${p.mode}</span></td>
+          <td>${p.termfee > 0 ? 'KES '+parseFloat(p.termfee).toLocaleString() : '—'}</td>
+          <td>${p.examfee > 0 ? 'KES '+parseFloat(p.examfee).toLocaleString() : '—'}</td>
+          <td>${p.actfee > 0 ? 'KES '+parseFloat(p.actfee).toLocaleString() : '—'}</td>
+          <td><strong>KES ${total.toLocaleString()}</strong></td>
+          <td><button class="btn btn-danger btn-sm" onclick="deletePayment('${p.id}')">🗑️</button></td>
+        </tr>`;
+    }).join('');
+    document.getElementById('paymentsTotals').innerHTML = `
+      Showing ${filtered.length} record(s) &nbsp;|&nbsp;
+      Term Fees: <strong>KES ${totTerm.toLocaleString()}</strong> &nbsp;|&nbsp;
+      Exam Fees: <strong>KES ${totExam.toLocaleString()}</strong> &nbsp;|&nbsp;
+      Activity Fees: <strong>KES ${totAct.toLocaleString()}</strong> &nbsp;|&nbsp;
+      <strong style="color:var(--green-dark);">Grand Total: KES ${grand.toLocaleString()}</strong>
+    `;
+  }
+}
+
+function deletePayment(id) {
+  if (!confirm('Delete this payment record?')) return;
+  payments = payments.filter(p => p.id !== id);
+  persist(); updateHeaderStats(); renderPayments(); renderDashboard();
+}
+
+// =========================================================
+// STATEMENT
+// =========================================================
+function generateStatement() {
+  const id = document.getElementById('st_learner').value;
+  const yearFilter = document.getElementById('st_year').value;
+  const output = document.getElementById('statementOutput');
+  if (!id) { output.innerHTML = ''; return; }
+
+  const l = learners.find(x => x.id === id);
+  if (!l) return;
+  const cat = GRADE_CAT[l.grade];
+  const cfg = feeConfig[cat] || {};
+
+  let pList = payments.filter(p => p.learnerId === id);
+  if (yearFilter) pList = pList.filter(p => p.year == yearFilter);
+  pList.sort((a,b) => new Date(a.date) - new Date(b.date));
+
+  const totTerm = pList.reduce((s,p) => s + (parseFloat(p.termfee)||0), 0);
+  const totExam = pList.reduce((s,p) => s + (parseFloat(p.examfee)||0), 0);
+  const totAct  = pList.reduce((s,p) => s + (parseFloat(p.actfee)||0), 0);
+  const totalPaid = totTerm + totExam + totAct;
+
+  const age = l.yob ? new Date().getFullYear() - parseInt(l.yob) : '?';
+  const now = new Date().toLocaleDateString('en-KE', { day:'2-digit', month:'long', year:'numeric' });
+  const expectedPerTerm = catTotal(cat);
+
+  // Current term balance
+  const currTermKey = `${academicSettings.term}-${academicSettings.year}`;
+  const currPays = payments.filter(p => p.learnerId === id && p.term === academicSettings.term && p.year === academicSettings.year);
+  const currPaidTerm = currPays.reduce((s,p) => s + (parseFloat(p.termfee)||0), 0);
+  const currPaidExam = currPays.reduce((s,p) => s + (parseFloat(p.examfee)||0), 0);
+  const currPaidAct  = currPays.reduce((s,p) => s + (parseFloat(p.actfee)||0), 0);
+  const currTotal = currPaidTerm + currPaidExam + currPaidAct;
+  const currBal = expectedPerTerm - currTotal;
+
+  output.innerHTML = `
+    <div class="card" id="statementCard">
+      <div class="statement-header">
+        <div>
+          <div class="statement-school-name">Kiambogo Township Primary School</div>
+          <div class="statement-sub">Kiambogo Shopping Centre</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:20px; font-weight:700; color:var(--gold); font-family:'Playfair Display',serif;">FEE STATEMENT</div>
+          <div class="statement-sub">Generated: ${now}</div>
+          ${yearFilter ? `<div class="statement-sub">Year: ${yearFilter}</div>` : ''}
+        </div>
+      </div>
+
+      <div class="statement-learner">
+        <div class="sl-item"><label>Learner Name</label><span>${fullName(l)}</span></div>
+        <div class="sl-item"><label>Adm. No.</label><span>${l.admNo}</span></div>
+        <div class="sl-item"><label>Grade</label><span>${l.grade}</span></div>
+        <div class="sl-item"><label>Gender</label><span>${l.gender}</span></div>
+        <div class="sl-item"><label>Year of Birth</label><span>${l.yob} (Age ${age})</span></div>
+        <div class="sl-item"><label>Parent / Guardian</label><span>${l.parentName}</span></div>
+        <div class="sl-item"><label>Contact</label><span>${l.parentContact}</span></div>
+        <div class="sl-item"><label>Home Area</label><span>${l.homeArea}</span></div>
+        ${cfg.term ? `<div class="sl-item"><label>Term Fee</label><span>KES ${(cfg.term||0).toLocaleString()}</span></div>` : ''}
+        ${cfg.exam ? `<div class="sl-item"><label>Exam Fee</label><span>KES ${(cfg.exam||0).toLocaleString()}</span></div>` : ''}
+        ${cfg.act  ? `<div class="sl-item"><label>Activity Fee</label><span>KES ${(cfg.act||0).toLocaleString()}</span></div>` : ''}
+        ${expectedPerTerm ? `<div class="sl-item"><label>Total Expected / Term</label><span style="color:var(--green-dark); font-weight:700;">KES ${expectedPerTerm.toLocaleString()}</span></div>` : ''}
+      </div>
+
+      ${pList.length === 0
+        ? `<div class="empty-state"><div class="emoji">📭</div><p>No payment records found${yearFilter ? ' in '+yearFilter : ''}.</p></div>`
+        : `<div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th><th>Date</th><th>Term / Year</th><th>Mode</th>
+                  <th>Ref No.</th><th>Term Fee</th><th>Exam Fee</th><th>Activity Fee</th>
+                  <th style="text-align:right;">Total (KES)</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${pList.map((p,i) => {
+                  const rowTotal = (parseFloat(p.termfee)||0) + (parseFloat(p.examfee)||0) + (parseFloat(p.actfee)||0);
+                  return `<tr>
+                    <td>${i+1}</td>
+                    <td>${formatDate(p.date)}</td>
+                    <td>${p.term} ${p.year}</td>
+                    <td><span class="badge badge-gold">${p.mode}</span></td>
+                    <td>${p.receipt || '—'}</td>
+                    <td>${p.termfee > 0 ? p.termfee.toLocaleString() : '—'}</td>
+                    <td>${p.examfee > 0 ? p.examfee.toLocaleString() : '—'}</td>
+                    <td>${p.actfee > 0  ? p.actfee.toLocaleString()  : '—'}</td>
+                    <td style="text-align:right;"><strong>${rowTotal.toLocaleString()}</strong></td>
+                  </tr>`;
+                }).join('')}
+              </tbody>
+              <tfoot style="background:var(--gray-100);">
+                <tr>
+                  <td colspan="5" style="font-weight:600; font-size:13px;">Totals</td>
+                  <td><strong>${totTerm.toLocaleString()}</strong></td>
+                  <td><strong>${totExam.toLocaleString()}</strong></td>
+                  <td><strong>${totAct.toLocaleString()}</strong></td>
+                  <td style="text-align:right;"><strong>KES ${totalPaid.toLocaleString()}</strong></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          <div class="statement-total">
+            <div class="total-item">
+              <label>Total Paid (All Time)</label>
+              <div class="amount green">KES ${totalPaid.toLocaleString()}</div>
+            </div>
+            ${expectedPerTerm ? `
+            <div class="total-item">
+              <label>${academicSettings.term} ${academicSettings.year} — Paid</label>
+              <div class="amount green">KES ${currTotal.toLocaleString()}</div>
+            </div>
+            <div class="total-item">
+              <label>${academicSettings.term} ${academicSettings.year} — Balance</label>
+              <div class="amount ${currBal > 0 ? 'red' : 'green'}">${currBal > 0 ? '−' : ''}KES ${Math.abs(currBal).toLocaleString()}</div>
+            </div>` : ''}
+          </div>`
+      }
+
+      <div class="no-print" style="margin-top:20px; display:flex; gap:12px;">
+        <button class="btn btn-primary" onclick="window.print()">🖨️ Print Statement</button>
+        <button class="btn btn-outline" onclick="document.getElementById('statementOutput').innerHTML=''">✖ Close</button>
+      </div>
+
+      <div style="margin-top:24px; padding-top:16px; border-top:1px solid var(--gray-100); font-size:11px; color:var(--gray-500); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+        <span>Kiambogo Township Primary School — Official Fee Statement</span>
+        <span>Printed: ${now}</span>
+      </div>
+    </div>`;
+}
+
+// =========================================================
+// DASHBOARD
+// =========================================================
+function renderDashboard() {
+  const males   = learners.filter(l => l.gender === 'Male').length;
+  const females = learners.filter(l => l.gender === 'Female').length;
+  const totalPaid = payments.reduce((s,p) => s + (parseFloat(p.termfee)||0) + (parseFloat(p.examfee)||0) + (parseFloat(p.actfee)||0), 0);
+
+  let expectedTotal = 0;
+  learners.forEach(l => { expectedTotal += catTotal(GRADE_CAT[l.grade]); });
+
+  const currTermPaid = payments
+    .filter(p => p.term === academicSettings.term && p.year === academicSettings.year)
+    .reduce((s,p) => s + (parseFloat(p.termfee)||0) + (parseFloat(p.examfee)||0) + (parseFloat(p.actfee)||0), 0);
+
+  document.getElementById('dashStats').innerHTML = `
+    <div class="stat-card"><div class="stat-num">${learners.length}</div><div class="stat-label">Total Learners</div></div>
+    <div class="stat-card"><div class="stat-num">${males}</div><div class="stat-label">Male Learners</div></div>
+    <div class="stat-card"><div class="stat-num">${females}</div><div class="stat-label">Female Learners</div></div>
+    <div class="stat-card gold">
+      <div class="stat-num" style="font-size:20px;">KES ${currTermPaid.toLocaleString()}</div>
+      <div class="stat-label">${academicSettings.term} ${academicSettings.year} — Collected</div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-num" style="font-size:20px;">KES ${Math.max(0, expectedTotal - currTermPaid).toLocaleString()}</div>
+      <div class="stat-label">${academicSettings.term} ${academicSettings.year} — Outstanding</div>
+    </div>`;
+
+  // Grade breakdown
+  const gradeCounts = {};
+  GRADES.forEach(g => { gradeCounts[g] = 0; });
+  learners.forEach(l => { if (gradeCounts[l.grade] !== undefined) gradeCounts[l.grade]++; });
+  const maxCount = Math.max(...Object.values(gradeCounts), 1);
+
+  document.getElementById('gradeBreakdown').innerHTML = GRADES.map(g => `
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+      <div style="width:90px; font-size:12px; color:var(--gray-700); flex-shrink:0;">${g}</div>
+      <div style="flex:1; background:var(--gray-100); border-radius:4px; height:20px; overflow:hidden;">
+        <div style="width:${(gradeCounts[g]/maxCount)*100}%; background:var(--green-mid); height:100%; border-radius:4px;"></div>
+      </div>
+      <div style="font-size:13px; font-weight:600; width:24px; text-align:right;">${gradeCounts[g]}</div>
+    </div>`).join('');
+
+  // Fees summary
+  const termGroups = {};
+  payments.forEach(p => {
+    const key = `${p.term} ${p.year}`;
+    if (!termGroups[key]) termGroups[key] = 0;
+    termGroups[key] += (parseFloat(p.termfee)||0) + (parseFloat(p.examfee)||0) + (parseFloat(p.actfee)||0);
+  });
+  const sorted = Object.entries(termGroups).sort((a,b) => b[1] - a[1]);
+  document.getElementById('feesSummary').innerHTML = sorted.length === 0
+    ? '<div class="empty-state" style="padding:20px;"><div class="emoji">💰</div><p>No payments yet.</p></div>'
+    : sorted.map(([term, amt]) => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--gray-100);">
+          <span style="font-size:14px;">${term}</span>
+          <strong style="color:var(--green-mid);">KES ${amt.toLocaleString()}</strong>
+        </div>`).join('') + `
+      <div style="display:flex; justify-content:space-between; padding:12px 0 0; border-top:2px solid var(--green-mid);">
+        <strong>All Time Total</strong>
+        <strong style="color:var(--green-dark); font-size:16px;">KES ${totalPaid.toLocaleString()}</strong>
+      </div>`;
+
+  const recent = [...learners].sort((a,b) => new Date(b.registeredAt) - new Date(a.registeredAt)).slice(0, 5);
+  document.getElementById('recentLearners').innerHTML = recent.length === 0
+    ? '<div class="empty-state" style="padding:20px;"><div class="emoji">🎒</div><p>No learners admitted yet.</p></div>'
+    : `<div class="table-wrap"><table>
+        <thead><tr><th>Adm No.</th><th>Name</th><th>Grade</th><th>Parent</th><th>Admitted</th></tr></thead>
+        <tbody>${recent.map(l => `
+          <tr>
+            <td>${l.admNo}</td><td>${fullName(l)}</td>
+            <td><span class="badge badge-green">${l.grade}</span></td>
+            <td>${l.parentName}</td>
+            <td>${formatDate(l.admDate || l.registeredAt?.split('T')[0])}</td>
+          </tr>`).join('')}</tbody>
+      </table></div>`;
+}
+
+// =========================================================
+// SETTINGS
+// =========================================================
+function updateCatTotal(cat) {
+  const t = parseFloat(document.getElementById(`fee_${cat}_term`).value) || 0;
+  const e = parseFloat(document.getElementById(`fee_${cat}_exam`).value) || 0;
+  const a = parseFloat(document.getElementById(`fee_${cat}_act`).value)  || 0;
+  document.getElementById(`fee_${cat}_total`).textContent = 'KES ' + (t+e+a).toLocaleString();
+}
+
+function loadFeeConfigUI() {
+  ['a','b','c'].forEach(cat => {
+    const cfg = feeConfig[cat] || {};
+    document.getElementById(`fee_${cat}_term`).value = cfg.term || '';
+    document.getElementById(`fee_${cat}_exam`).value = cfg.exam || '';
+    document.getElementById(`fee_${cat}_act`).value  = cfg.act  || '';
+    updateCatTotal(cat);
+  });
+}
+
+function saveFeeConfig() {
+  ['a','b','c'].forEach(cat => {
+    feeConfig[cat] = {
+      term: parseFloat(document.getElementById(`fee_${cat}_term`).value) || 0,
+      exam: parseFloat(document.getElementById(`fee_${cat}_exam`).value) || 0,
+      act:  parseFloat(document.getElementById(`fee_${cat}_act`).value)  || 0,
+    };
+  });
+  save('ktps_fees', feeConfig);
+  showAlert('feeConfigAlert', '✅ Fee configuration saved successfully!', 'success');
+}
+
+function loadAcademicSettings() {
+  document.getElementById('set_year').value = academicSettings.year;
+  document.getElementById('set_term').value = academicSettings.term;
+}
+
+function saveAcademicSettings() {
+  academicSettings.year = parseInt(document.getElementById('set_year').value) || new Date().getFullYear();
+  academicSettings.term = document.getElementById('set_term').value;
+  save('ktps_academic', academicSettings);
+  showAlert('academicAlert', '✅ Academic settings saved!', 'success');
+}
+
+function backupData() {
+  const backup = { learners, payments, feeConfig, academicSettings, exportedAt: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `KTPS_Backup_${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+}
+
+function restoreData(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (confirm(`Restore backup from ${data.exportedAt ? new Date(data.exportedAt).toLocaleString() : 'unknown date'}? This will replace current data.`)) {
+        learners = data.learners || [];
+        payments = data.payments || [];
+        feeConfig = data.feeConfig || { a:{term:0,exam:0,act:0}, b:{term:0,exam:0,act:0}, c:{term:0,exam:0,act:0} };
+        academicSettings = data.academicSettings || { year: new Date().getFullYear(), term: 'Term 1' };
+        persist(); save('ktps_fees', feeConfig); save('ktps_academic', academicSettings);
+        location.reload();
+      }
+    } catch { alert('❌ Invalid backup file.'); }
+  };
+  reader.readAsText(file);
+}
+
+function clearAllData() {
+  learners = []; payments = [];
+  feeConfig = { a:{term:0,exam:0,act:0}, b:{term:0,exam:0,act:0}, c:{term:0,exam:0,act:0} };
+  academicSettings = { year: new Date().getFullYear(), term: 'Term 1' };
+  localStorage.clear(); location.reload();
+}
+
+function exportCSV() {
+  const header = ['Adm No','First Name','Middle Name','Last Name','Grade','Gender','YOB','Parent Name','Contact','Home Area','BC No','NEMIS','Adm Date','Notes'];
+  const rows = learners.map(l => [l.admNo,l.firstName,l.middleName,l.lastName,l.grade,l.gender,l.yob,l.parentName,l.parentContact,l.homeArea,l.bcNo,l.nemis,l.admDate,l.notes]);
+  const csv = [header,...rows].map(r => r.map(c => `"${(c||'').toString().replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+  a.download = `KTPS_Learners_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+}
+
+// =========================================================
+// UTILS
+// =========================================================
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  try { return new Date(dateStr).toLocaleDateString('en-KE', { day:'2-digit', month:'short', year:'numeric' }); }
+  catch { return dateStr; }
+}
+
+function showAlert(id, msg, type) {
+  const el = document.getElementById(id); if (!el) return;
+  el.innerHTML = `<div class="alert alert-${type === 'error' ? 'error' : 'success'}">${msg}</div>`;
+  setTimeout(() => { el.innerHTML = ''; }, 5000);
+}
+
+// =========================================================
+// EXAMS MODULE
+// =========================================================
+const CBC_SUBJECTS = ['Mathematics','English','Kiswahili','Science & Technology','Social Studies','CRE','Creative Arts','Physical Education'];
+
+let examRecords = load('ktps_exams', []); // [{id, examName, grade, term, year, date, maxMarks, marks:{learnerId:{subject:score}}}]
+
+function saveExams() { save('ktps_exams', examRecords); }
+
+// ---- TAB SWITCHING ----
+function switchExamTab(tab, btn) {
+  ['enter','results','report','analysis'].forEach(t => {
+    document.getElementById('exam-panel-' + t).style.display = 'none';
+    const b = document.getElementById('etab-' + t);
+    b.style.background = 'white';
+    b.style.color = 'var(--green-dark)';
+    b.style.fontWeight = '500';
+  });
+  document.getElementById('exam-panel-' + tab).style.display = 'block';
+  btn.style.background = 'var(--green-mid)';
+  btn.style.color = 'white';
+  btn.style.fontWeight = '600';
+  if (tab === 'results') { populateExamGradeFilters('res_grade','res_exam'); renderResults(); }
+  if (tab === 'report')  { populateReportCardSelects(); renderReportCard(); }
+  if (tab === 'analysis'){ populateExamGradeFilters('an_grade','an_exam'); renderAnalysis(); }
+}
+
+function initExamsPage() {
+  // Populate grade selects for enter-marks
+  const emGrade = document.getElementById('em_grade');
+  if (emGrade) {
+    emGrade.innerHTML = '<option value="">— Select Grade —</option>' + GRADES.map(g=>`<option>${g}</option>`).join('');
+  }
+  // Set defaults
+  const emYear = document.getElementById('em_year');
+  if (emYear) emYear.value = academicSettings.year;
+  const emTerm = document.getElementById('em_term');
+  if (emTerm) emTerm.value = academicSettings.term;
+  const emDate = document.getElementById('em_date');
+  if (emDate) emDate.value = new Date().toISOString().split('T')[0];
+  document.getElementById('marksTableWrap').style.display = 'none';
+  document.getElementById('marksEmptyMsg').style.display = 'none';
+}
+
+// ---- ENTER MARKS ----
+function loadClassForMarks() {
+  const grade = document.getElementById('em_grade').value;
+  const tableWrap = document.getElementById('marksTableWrap');
+  const emptyMsg  = document.getElementById('marksEmptyMsg');
+  if (!grade) { tableWrap.style.display='none'; emptyMsg.style.display='none'; return; }
+
+  const classLearners = learners.filter(l => l.grade === grade).sort((a,b)=>a.lastName.localeCompare(b.lastName));
+  if (classLearners.length === 0) {
+    tableWrap.style.display = 'none';
+    emptyMsg.style.display = 'block';
+    return;
+  }
+  emptyMsg.style.display = 'none';
+  tableWrap.style.display = 'block';
+
+  // Build header
+  document.getElementById('marksInputHead').innerHTML = `
+    <tr>
+      <th style="min-width:140px;">Learner</th>
+      <th style="min-width:60px;">Adm No.</th>
+      ${CBC_SUBJECTS.map(s=>`<th style="min-width:80px;text-align:center;">${s}</th>`).join('')}
+      <th style="min-width:70px;text-align:center;background:var(--gold-light);color:#7a5415;">Total</th>
+      <th style="min-width:70px;text-align:center;background:var(--gold-light);color:#7a5415;">Avg %</th>
+    </tr>`;
+
+  // Check for existing exam record to pre-fill
+  const existingRecord = findExistingRecord();
+
+  document.getElementById('marksInputBody').innerHTML = classLearners.map(l => {
+    const existMarks = existingRecord ? (existingRecord.marks[l.id] || {}) : {};
+    const subjectInputs = CBC_SUBJECTS.map((s,si) => {
+      const val = existMarks[s] !== undefined ? existMarks[s] : '';
+      return `<td style="text-align:center;padding:6px;"><input type="number" min="0" id="mk_${l.id}_${si}" value="${val}" style="width:68px;text-align:center;padding:6px;border:1.5px solid var(--gray-300);border-radius:6px;font-size:13px;" oninput="calcRowTotal('${l.id}')" onkeydown="markTabHandler(event,'${l.id}',${si})"></td>`;
+    }).join('');
+    return `<tr id="row_${l.id}">
+      <td><strong>${fullName(l)}</strong></td>
+      <td style="font-size:12px;color:var(--gray-500);">${l.admNo}</td>
+      ${subjectInputs}
+      <td id="rowtotal_${l.id}" style="text-align:center;font-weight:700;color:var(--green-dark);background:var(--green-pale);">—</td>
+      <td id="rowavg_${l.id}"   style="text-align:center;font-weight:600;background:var(--green-pale);">—</td>
+    </tr>`;
+  }).join('');
+
+  // Compute initial row totals if pre-filled
+  classLearners.forEach(l => calcRowTotal(l.id));
+}
+
+function findExistingRecord() {
+  const grade   = document.getElementById('em_grade').value;
+  const name    = document.getElementById('em_name').value.trim();
+  const term    = document.getElementById('em_term').value;
+  const year    = parseInt(document.getElementById('em_year').value);
+  if (!grade || !name) return null;
+  return examRecords.find(r => r.grade===grade && r.examName===name && r.term===term && r.year===year) || null;
+}
+
+function calcRowTotal(learnerId) {
+  const maxMarks = parseInt(document.getElementById('em_maxmarks').value) || 100;
+  let sum = 0; let count = 0;
+  CBC_SUBJECTS.forEach((s,si) => {
+    const inp = document.getElementById(`mk_${learnerId}_${si}`);
+    if (inp && inp.value !== '') {
+      sum += Math.min(parseFloat(inp.value)||0, maxMarks);
+      count++;
+    }
+  });
+  const totalEl = document.getElementById(`rowtotal_${learnerId}`);
+  const avgEl   = document.getElementById(`rowavg_${learnerId}`);
+  if (count === 0) { totalEl.textContent='—'; avgEl.textContent='—'; return; }
+  const avg = ((sum/(count*maxMarks))*100).toFixed(1);
+  totalEl.textContent = sum;
+  avgEl.textContent = avg + '%';
+  avgEl.style.color = avg >= 50 ? 'var(--green-mid)' : 'var(--red)';
+}
+
+function markTabHandler(e, learnerId, subjectIdx) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const nextSi = subjectIdx + 1;
+    if (nextSi < CBC_SUBJECTS.length) {
+      document.getElementById(`mk_${learnerId}_${nextSi}`)?.focus();
+    }
+  }
+}
+
+function saveExamMarks() {
+  const grade    = document.getElementById('em_grade').value;
+  const examName = document.getElementById('em_name').value.trim();
+  const term     = document.getElementById('em_term').value;
+  const year     = parseInt(document.getElementById('em_year').value);
+  const date     = document.getElementById('em_date').value;
+  const maxMarks = parseInt(document.getElementById('em_maxmarks').value) || 100;
+
+  if (!grade || !examName) {
+    showAlert('examSaveAlert','❌ Please enter an Exam Name and select a Grade.','error'); return;
+  }
+
+  const classLearners = learners.filter(l => l.grade === grade);
+  if (classLearners.length === 0) {
+    showAlert('examSaveAlert','❌ No learners in this grade.','error'); return;
+  }
+
+  const marksData = {};
+  classLearners.forEach(l => {
+    marksData[l.id] = {};
+    CBC_SUBJECTS.forEach((s,si) => {
+      const val = document.getElementById(`mk_${l.id}_${si}`)?.value;
+      if (val !== '' && val !== undefined) {
+        marksData[l.id][s] = Math.min(parseFloat(val)||0, maxMarks);
+      }
+    });
+  });
+
+  // Update or insert
+  const idx = examRecords.findIndex(r => r.grade===grade && r.examName===examName && r.term===term && r.year===year);
+  const record = { id: idx>=0 ? examRecords[idx].id : Date.now().toString(), examName, grade, term, year, date, maxMarks, marks: marksData };
+  if (idx >= 0) examRecords[idx] = record;
+  else examRecords.push(record);
+  saveExams();
+  showAlert('examSaveAlert',`✅ Marks saved for "${examName}" — ${grade} (${term} ${year})`, 'success');
+}
+
+function clearMarksForm() {
+  document.getElementById('em_name').value = '';
+  document.getElementById('em_grade').value = '';
+  document.getElementById('marksTableWrap').style.display = 'none';
+  document.getElementById('marksEmptyMsg').style.display = 'none';
+}
+
+// ---- POPULATE DROPDOWNS ----
+function populateExamGradeFilters(gradeId, examId) {
+  const gradeEl = document.getElementById(gradeId);
+  const examEl  = document.getElementById(examId);
+  gradeEl.innerHTML = '<option value="">— Select Grade —</option>' + GRADES.map(g=>`<option>${g}</option>`).join('');
+  examEl.innerHTML  = '<option value="">— Select Exam —</option>';
+  gradeEl.onchange = () => {
+    const g = gradeEl.value;
+    const examsForGrade = examRecords.filter(r => r.grade === g);
+    examEl.innerHTML = '<option value="">— Select Exam —</option>' +
+      examsForGrade.map(r=>`<option value="${r.id}">${r.examName} (${r.term} ${r.year})</option>`).join('');
+    if (gradeId === 'res_grade') renderResults();
+    if (gradeId === 'an_grade')  renderAnalysis();
+  };
+  examEl.onchange = () => {
+    if (gradeId === 'res_grade') renderResults();
+    if (gradeId === 'an_grade')  renderAnalysis();
+  };
+}
+
+function populateReportCardSelects() {
+  const rcLearner = document.getElementById('rc_learner');
+  const rcExam    = document.getElementById('rc_exam');
+  const sorted = [...learners].sort((a,b)=>a.lastName.localeCompare(b.lastName));
+  rcLearner.innerHTML = '<option value="">— Select Learner —</option>' +
+    sorted.map(l=>`<option value="${l.id}">${l.admNo} — ${fullName(l)} (${l.grade})</option>`).join('');
+  rcLearner.onchange = () => {
+    const l = learners.find(x=>x.id===rcLearner.value);
+    if (!l) { rcExam.innerHTML='<option value="">All Exams This Grade</option>'; renderReportCard(); return; }
+    const examsForLearner = examRecords.filter(r=>r.grade===l.grade);
+    rcExam.innerHTML = '<option value="">All Exams This Grade</option>' +
+      examsForLearner.map(r=>`<option value="${r.id}">${r.examName} (${r.term} ${r.year})</option>`).join('');
+    renderReportCard();
+  };
+  rcExam.onchange = renderReportCard;
+}
+
+// ---- CBC GRADE HELPER ----
+function cbcGrade(score, max) {
+  const pct = (score/max)*100;
+  if (pct >= 80) return { letter:'EE', label:'Exceeds Expectations', color:'#166534' };
+  if (pct >= 60) return { letter:'ME', label:'Meets Expectations',   color:'var(--green-mid)' };
+  if (pct >= 40) return { letter:'AE', label:'Approaches Expectations', color:'var(--gold)' };
+  return           { letter:'BE', label:'Below Expectations',    color:'var(--red)' };
+}
+
+// ---- CLASS RESULTS ----
+function renderResults() {
+  const grade  = document.getElementById('res_grade').value;
+  const recId  = document.getElementById('res_exam').value;
+  const output = document.getElementById('resultsOutput');
+  if (!grade || !recId) { output.innerHTML='<div class="empty-state"><div class="emoji">📊</div><p>Select a grade and exam.</p></div>'; return; }
+
+  const rec = examRecords.find(r=>r.id===recId);
+  if (!rec) { output.innerHTML='<div class="empty-state"><div class="emoji">⚠️</div><p>Exam not found.</p></div>'; return; }
+
+  const classLearners = learners.filter(l=>l.grade===grade).sort((a,b)=>a.lastName.localeCompare(b.lastName));
+  const maxMarks = rec.maxMarks || 100;
+
+  // Compute totals for ranking
+  const withScores = classLearners.map(l => {
+    const lMarks = rec.marks[l.id] || {};
+    const scores = CBC_SUBJECTS.map(s => lMarks[s] !== undefined ? lMarks[s] : null);
+    const taken  = scores.filter(s => s !== null);
+    const total  = taken.reduce((a,b)=>a+b,0);
+    const avg    = taken.length > 0 ? (total/(taken.length*maxMarks)*100) : null;
+    return { l, scores, total, avg, taken: taken.length };
+  });
+  withScores.sort((a,b) => (b.avg??-1) - (a.avg??-1));
+
+  let rank=1;
+  withScores.forEach((item,i) => {
+    item.position = (item.avg !== null) ? rank++ : '—';
+  });
+
+  output.innerHTML = `
+    <div style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
+      <div>
+        <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--green-dark);">${rec.examName}</div>
+        <div style="font-size:13px;color:var(--gray-500);">${rec.grade} &nbsp;|&nbsp; ${rec.term} ${rec.year} &nbsp;|&nbsp; Out of ${maxMarks} per subject</div>
+      </div>
+      <button class="btn btn-outline btn-sm no-print" onclick="window.print()">🖨️ Print</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Pos.</th>
+            <th>Learner</th>
+            ${CBC_SUBJECTS.map(s=>`<th style="text-align:center;min-width:70px;">${s.split(' ')[0]}</th>`).join('')}
+            <th style="text-align:center;background:var(--gold-light);color:#7a5415;">Total</th>
+            <th style="text-align:center;background:var(--gold-light);color:#7a5415;">Avg %</th>
+            <th style="text-align:center;">Grade</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${withScores.map(({l, scores, total, avg, taken, position}) => {
+            const gr = avg !== null ? cbcGrade(avg, 100) : null;
+            return `<tr>
+              <td style="font-weight:700;text-align:center;">${position}</td>
+              <td><strong>${fullName(l)}</strong><div style="font-size:11px;color:var(--gray-500);">${l.admNo}</div></td>
+              ${scores.map(s => `<td style="text-align:center;">${s !== null ? s : '<span style="color:var(--gray-300);">—</span>'}</td>`).join('')}
+              <td style="text-align:center;font-weight:700;background:var(--green-pale);">${taken>0?total:'—'}</td>
+              <td style="text-align:center;font-weight:600;background:var(--green-pale);color:${avg!==null?(avg>=50?'var(--green-mid)':'var(--red)'):'inherit'};">${avg!==null?avg.toFixed(1)+'%':'—'}</td>
+              <td style="text-align:center;">${gr ? `<span class="badge" style="background:${gr.color}20;color:${gr.color};">${gr.letter}</span>` : '—'}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+// ---- REPORT CARD ----
+function renderReportCard() {
+  const learnerId = document.getElementById('rc_learner').value;
+  const examId    = document.getElementById('rc_exam').value;
+  const output    = document.getElementById('reportCardOutput');
+  if (!learnerId) { output.innerHTML=''; return; }
+
+  const l = learners.find(x=>x.id===learnerId);
+  if (!l) return;
+
+  const recs = examId
+    ? examRecords.filter(r=>r.id===examId)
+    : examRecords.filter(r=>r.grade===l.grade);
+
+  if (recs.length === 0) {
+    output.innerHTML='<div class="card"><div class="empty-state"><div class="emoji">📭</div><p>No exam records found for this learner.</p></div></div>';
+    return;
+  }
+
+  const now = new Date().toLocaleDateString('en-KE',{day:'2-digit',month:'long',year:'numeric'});
+  const age = l.yob ? new Date().getFullYear() - parseInt(l.yob) : '?';
+
+  const reportHTML = recs.map(rec => {
+    const maxMarks = rec.maxMarks || 100;
+    const lMarks   = rec.marks[l.id] || {};
+    const rows = CBC_SUBJECTS.map(s => {
+      const score = lMarks[s];
+      if (score === undefined) return null;
+      const gr = cbcGrade(score, maxMarks);
+      const pct = ((score/maxMarks)*100).toFixed(1);
+      return { s, score, pct, gr };
+    }).filter(Boolean);
+
+    const totalScore = rows.reduce((a,r)=>a+r.score,0);
+    const overallPct = rows.length > 0 ? (totalScore/(rows.length*maxMarks)*100) : 0;
+    const overallGr  = rows.length > 0 ? cbcGrade(overallPct, 100) : null;
+
+    // Position in class
+    const classLearners = learners.filter(x=>x.grade===l.grade);
+    const allTotals = classLearners.map(cl => {
+      const cm = rec.marks[cl.id]||{};
+      const taken = CBC_SUBJECTS.map(s=>cm[s]).filter(v=>v!==undefined);
+      return { id:cl.id, avg: taken.length>0 ? taken.reduce((a,b)=>a+b,0)/(taken.length*maxMarks)*100 : -1 };
+    }).sort((a,b)=>b.avg-a.avg);
+    const posIdx = allTotals.findIndex(x=>x.id===l.id);
+    const position = posIdx>=0 && allTotals[posIdx].avg>=0 ? posIdx+1 : '—';
+    const classSize = classLearners.length;
+
+    // Bar chart row
+    const barRow = (score, max) => {
+      const pct = (score/max)*100;
+      return `<div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
+        <div style="flex:1;background:var(--gray-100);border-radius:4px;height:8px;overflow:hidden;">
+          <div style="width:${pct}%;background:${pct>=80?'#166534':pct>=60?'var(--green-mid)':pct>=40?'var(--gold)':'var(--red)'};height:100%;border-radius:4px;"></div>
+        </div>
+        <span style="font-size:11px;color:var(--gray-500);width:36px;text-align:right;">${pct.toFixed(0)}%</span>
+      </div>`;
+    };
+
+    return `
+      <div class="card" style="page-break-after:always;margin-bottom:32px;" id="reportCard_${rec.id}">
+        <!-- Header -->
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;padding-bottom:16px;border-bottom:3px solid var(--green-mid);">
+          <div>
+            <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--green-dark);">Kiambogo Township Primary School</div>
+            <div style="font-size:12px;color:var(--gray-500);">Kiambogo Shopping Centre</div>
+            <div style="font-size:14px;font-weight:700;color:var(--gold);margin-top:6px;font-family:'Playfair Display',serif;">ACADEMIC REPORT CARD</div>
+          </div>
+          <div style="text-align:right;">
+            ${l.photo ? `<img src="${l.photo}" style="width:70px;height:80px;object-fit:cover;border-radius:8px;border:3px solid var(--green-pale);">` : `<div style="width:70px;height:80px;border-radius:8px;background:var(--green-pale);display:flex;align-items:center;justify-content:center;font-size:32px;border:2px dashed var(--green-light);">👤</div>`}
+          </div>
+        </div>
+
+        <!-- Learner info -->
+        <div style="background:var(--green-pale);border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:20px;">
+          <div><div style="font-size:11px;color:var(--gray-500);">Learner Name</div><div style="font-size:14px;font-weight:700;color:var(--green-dark);">${fullName(l)}</div></div>
+          <div><div style="font-size:11px;color:var(--gray-500);">Adm. No.</div><div style="font-size:14px;font-weight:600;">${l.admNo}</div></div>
+          <div><div style="font-size:11px;color:var(--gray-500);">Grade</div><div style="font-size:14px;font-weight:600;">${l.grade}</div></div>
+          <div><div style="font-size:11px;color:var(--gray-500);">Gender</div><div style="font-size:14px;font-weight:600;">${l.gender}</div></div>
+          <div><div style="font-size:11px;color:var(--gray-500);">Year of Birth</div><div style="font-size:14px;font-weight:600;">${l.yob} (Age ${age})</div></div>
+          <div><div style="font-size:11px;color:var(--gray-500);">Parent / Guardian</div><div style="font-size:14px;font-weight:600;">${l.parentName}</div></div>
+          <div><div style="font-size:11px;color:var(--gray-500);">Exam</div><div style="font-size:14px;font-weight:700;color:var(--gold);">${rec.examName} — ${rec.term} ${rec.year}</div></div>
+        </div>
+
+        <!-- Subject marks table -->
+        ${rows.length === 0
+          ? `<div class="empty-state"><div class="emoji">📝</div><p>No marks entered for this learner in this exam.</p></div>`
+          : `<div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Subject</th>
+                    <th style="text-align:center;">Score (/${maxMarks})</th>
+                    <th style="text-align:center;">%</th>
+                    <th style="text-align:center;">CBC Grade</th>
+                    <th>Performance Bar</th>
+                    <th>Remark</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rows.map(({s,score,pct,gr})=>`
+                    <tr>
+                      <td><strong>${s}</strong></td>
+                      <td style="text-align:center;font-size:16px;font-weight:700;">${score}</td>
+                      <td style="text-align:center;">${pct}%</td>
+                      <td style="text-align:center;"><span class="badge" style="background:${gr.color}20;color:${gr.color};font-size:12px;">${gr.letter}</span></td>
+                      <td style="min-width:140px;">${barRow(score,maxMarks)}</td>
+                      <td style="font-size:12px;color:var(--gray-700);">${gr.label}</td>
+                    </tr>`).join('')}
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Summary -->
+            <div style="margin-top:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;">
+              <div style="background:var(--green-pale);border-radius:10px;padding:14px;text-align:center;">
+                <div style="font-size:11px;color:var(--gray-500);">Total Score</div>
+                <div style="font-size:28px;font-weight:700;color:var(--green-dark);font-family:'Playfair Display',serif;">${totalScore}</div>
+                <div style="font-size:11px;color:var(--gray-500);">out of ${rows.length*maxMarks}</div>
+              </div>
+              <div style="background:var(--green-pale);border-radius:10px;padding:14px;text-align:center;">
+                <div style="font-size:11px;color:var(--gray-500);">Average</div>
+                <div style="font-size:28px;font-weight:700;color:${overallPct>=50?'var(--green-mid)':'var(--red)'};font-family:'Playfair Display',serif;">${overallPct.toFixed(1)}%</div>
+                <div style="font-size:11px;color:var(--gray-500);">overall percentage</div>
+              </div>
+              <div style="background:var(--gold-light);border-radius:10px;padding:14px;text-align:center;">
+                <div style="font-size:11px;color:var(--gray-500);">CBC Grade</div>
+                <div style="font-size:28px;font-weight:700;color:${overallGr?.color};font-family:'Playfair Display',serif;">${overallGr?.letter||'—'}</div>
+                <div style="font-size:11px;color:var(--gray-500);">${overallGr?.label||''}</div>
+              </div>
+              <div style="background:var(--blue-light);border-radius:10px;padding:14px;text-align:center;">
+                <div style="font-size:11px;color:var(--gray-500);">Class Position</div>
+                <div style="font-size:28px;font-weight:700;color:var(--blue);font-family:'Playfair Display',serif;">${position}</div>
+                <div style="font-size:11px;color:var(--gray-500);">out of ${classSize} learners</div>
+              </div>
+            </div>
+
+            <!-- Teacher remark section -->
+            <div style="margin-top:20px;padding:14px 18px;border:1.5px dashed var(--gray-300);border-radius:10px;">
+              <div style="font-size:12px;font-weight:600;color:var(--gray-700);margin-bottom:8px;">Class Teacher's Remark & Signature</div>
+              <div style="height:32px;border-bottom:1px solid var(--gray-300);margin-bottom:16px;"></div>
+              <div style="display:flex;gap:40px;font-size:12px;color:var(--gray-500);">
+                <div>Signature: ________________</div>
+                <div>Date: ${now}</div>
+                <div>Head Teacher's Stamp: ________________</div>
+              </div>
+            </div>`
+        }
+
+        <!-- Print button -->
+        <div class="no-print" style="margin-top:16px;display:flex;gap:10px;">
+          <button class="btn btn-primary" onclick="window.print()">🖨️ Print Report Card</button>
+          <button class="btn btn-outline" onclick="document.getElementById('reportCardOutput').innerHTML=''">✖ Close</button>
+        </div>
+
+        <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--gray-100);font-size:11px;color:var(--gray-400);display:flex;justify-content:space-between;flex-wrap:wrap;">
+          <span>Kiambogo Township Primary School — Official Report Card</span>
+          <span>Printed: ${now}</span>
+        </div>
+      </div>`;
+  }).join('');
+
+  output.innerHTML = reportHTML;
+}
+
+// ---- ANALYSIS ----
+function renderAnalysis() {
+  const grade  = document.getElementById('an_grade').value;
+  const recId  = document.getElementById('an_exam').value;
+  const output = document.getElementById('analysisOutput');
+  if (!grade || !recId) { output.innerHTML='<div class="empty-state"><div class="emoji">📈</div><p>Select a grade and exam.</p></div>'; return; }
+
+  const rec = examRecords.find(r=>r.id===recId);
+  if (!rec) return;
+
+  const classLearners = learners.filter(l=>l.grade===grade);
+  const maxMarks = rec.maxMarks || 100;
+
+  const subjectStats = CBC_SUBJECTS.map(s => {
+    const scores = classLearners.map(l => rec.marks[l.id]?.[s]).filter(v=>v!==undefined);
+    if (scores.length === 0) return { s, avg:null, highest:null, lowest:null, pass:0, total:0 };
+    const avg = scores.reduce((a,b)=>a+b,0)/scores.length;
+    return {
+      s,
+      avg: avg,
+      highest: Math.max(...scores),
+      lowest:  Math.min(...scores),
+      pass:    scores.filter(v=>(v/maxMarks)*100>=50).length,
+      total:   scores.length
+    };
+  }).filter(x=>x.avg!==null);
+
+  const overallAvgClass = subjectStats.length > 0
+    ? (subjectStats.reduce((a,b)=>a+b.avg,0)/subjectStats.length/maxMarks*100).toFixed(1)
+    : '—';
+
+  const barWidth = (val, max) => `${Math.round((val/max)*100)}%`;
+  const passColor = (pct) => pct >= 70 ? 'var(--green-mid)' : pct >= 50 ? 'var(--gold)' : 'var(--red)';
+
+  output.innerHTML = `
+    <div style="margin-bottom:16px;">
+      <strong style="font-size:16px;color:var(--green-dark);">${rec.examName} — ${grade}</strong>
+      <span style="font-size:13px;color:var(--gray-500);margin-left:12px;">${rec.term} ${rec.year}</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:24px;">
+      <div class="stat-card"><div class="stat-num">${classLearners.length}</div><div class="stat-label">Total Learners</div></div>
+      <div class="stat-card gold"><div class="stat-num">${overallAvgClass}%</div><div class="stat-label">Class Average</div></div>
+      <div class="stat-card"><div class="stat-num">${subjectStats.length}</div><div class="stat-label">Subjects Assessed</div></div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Subject</th>
+            <th style="text-align:center;">Avg Score</th>
+            <th style="text-align:center;">Avg %</th>
+            <th style="text-align:center;">Highest</th>
+            <th style="text-align:center;">Lowest</th>
+            <th style="text-align:center;">Pass Rate</th>
+            <th>Distribution</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${subjectStats.map(({s,avg,highest,lowest,pass,total}) => {
+            const avgPct = (avg/maxMarks*100).toFixed(1);
+            const passPct = ((pass/total)*100).toFixed(0);
+            const gr = cbcGrade(avg, maxMarks);
+            return `<tr>
+              <td><strong>${s}</strong></td>
+              <td style="text-align:center;font-weight:700;">${avg.toFixed(1)}</td>
+              <td style="text-align:center;">
+                <span style="color:${gr.color};font-weight:600;">${avgPct}%</span>
+                <span class="badge" style="background:${gr.color}20;color:${gr.color};margin-left:4px;">${gr.letter}</span>
+              </td>
+              <td style="text-align:center;color:var(--green-mid);font-weight:600;">${highest}</td>
+              <td style="text-align:center;color:var(--red);font-weight:600;">${lowest}</td>
+              <td style="text-align:center;">
+                <span style="color:${passColor(parseInt(passPct))};font-weight:700;">${passPct}%</span>
+                <div style="font-size:11px;color:var(--gray-500);">${pass}/${total} learners</div>
+              </td>
+              <td style="min-width:140px;">
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <div style="flex:1;background:var(--gray-100);border-radius:4px;height:14px;overflow:hidden;">
+                    <div style="width:${barWidth(avg,maxMarks)};background:${gr.color};height:100%;border-radius:4px;"></div>
+                  </div>
+                </div>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <div style="margin-top:20px;padding:14px;background:var(--green-pale);border-radius:10px;font-size:13px;color:var(--green-dark);">
+      <strong>CBC Grade Scale:</strong> &nbsp;
+      <span style="margin-right:16px;"><span class="badge" style="background:#16653420;color:#166534;">EE</span> Exceeds Expectations (80–100%)</span>
+      <span style="margin-right:16px;"><span class="badge badge-green">ME</span> Meets Expectations (60–79%)</span>
+      <span style="margin-right:16px;"><span class="badge badge-gold">AE</span> Approaches Expectations (40–59%)</span>
+      <span><span class="badge badge-red">BE</span> Below Expectations (0–39%)</span>
+    </div>`;
+}
+
+// ---- Update backup/restore to include exam data ----
+const _origBackup = backupData;
+function backupData() {
+  const backup = { learners, payments, feeConfig, academicSettings, examRecords, exportedAt: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `KTPS_Backup_${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+}
+
+const _origRestore = restoreData;
+function restoreData(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (confirm(`Restore backup from ${data.exportedAt ? new Date(data.exportedAt).toLocaleString() : 'unknown date'}? This will replace current data.`)) {
+        learners  = data.learners  || [];
+        payments  = data.payments  || [];
+        examRecords = data.examRecords || [];
+        feeConfig = data.feeConfig || { a:{term:0,exam:0,act:0}, b:{term:0,exam:0,act:0}, c:{term:0,exam:0,act:0} };
+        academicSettings = data.academicSettings || { year: new Date().getFullYear(), term: 'Term 1' };
+        persist(); save('ktps_fees', feeConfig); save('ktps_academic', academicSettings); saveExams();
+        location.reload();
+      }
+    } catch { alert('❌ Invalid backup file.'); }
+  };
+  reader.readAsText(file);
+}
+
+// Also make clearAllData clear exams
+const _origClear = clearAllData;
+function clearAllData() {
+  learners = []; payments = []; examRecords = [];
+  feeConfig = { a:{term:0,exam:0,act:0}, b:{term:0,exam:0,act:0}, c:{term:0,exam:0,act:0} };
+  academicSettings = { year: new Date().getFullYear(), term: 'Term 1' };
+  localStorage.clear(); location.reload();
+}
+
+
+['editModal','idCardModal','bcViewerModal'].forEach(id => {
+  document.getElementById(id).onclick = function(e) { if (e.target === this) closeModal(id); };
+});
+</script>
+</body>
+</html>
