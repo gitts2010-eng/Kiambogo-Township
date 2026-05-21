@@ -19,24 +19,22 @@
     projectId: "kiambogo-township",
     storageBucket: "kiambogo-township.firebasestorage.app",
     messagingSenderId: "127896384159",
-    appId: "1:127896384159:web:c91006e7be06226ff3a8aa"
+    appId: "1:127896384199:web:c91006e7be06226ff3a8aa"
   };
 
   const app  = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db   = getFirestore(app);
 
-  // ── Expose to global scope for use by the rest of the app ──
   window._fb = { auth, db, signInWithEmailAndPassword, signOut, onAuthStateChanged,
                  doc, setDoc, getDoc, collection, getDocs, deleteDoc, writeBatch };
 
-  // ── Auth state gate ──
   onAuthStateChanged(auth, user => {
     if (user) {
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('appRoot').style.display    = 'block';
       document.getElementById('currentUserEmail').textContent = user.email;
-      window._initApp();           // start the app once logged in
+      window._initApp();
     } else {
       document.getElementById('loginScreen').style.display = 'flex';
       document.getElementById('appRoot').style.display    = 'none';
@@ -87,9 +85,7 @@
     font-size: 13px; margin-top: 12px; display: none;
   }
   /* ── User pill in header ── */
-  .user-pill {
-    margin-left: auto; display: flex; align-items: center; gap: 10px;
-  }
+  .user-pill { display: flex; align-items: center; gap: 10px; margin-left: 20px; }
   .user-email { font-size: 12px; opacity: 0.8; }
   .logout-btn {
     background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
@@ -98,6 +94,8 @@
   }
   .logout-btn:hover { background: rgba(255,255,255,0.25); }
 </style>
+
+<style>
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
 
   :root {
@@ -997,7 +995,7 @@
 
   <div class="card">
     <div class="card-title">🗑️ Data Management</div>
-    <p style="font-size:13px; color:var(--gray-500); margin-bottom:16px;">All data is securely stored in Firebase cloud. Use backup/restore for local copies.</p>
+    <p style="font-size:13px; color:var(--gray-500); margin-bottom:16px;">All data is saved locally on this computer. Use these options carefully.</p>
     <div class="btn-actions">
       <button class="btn btn-outline" onclick="backupData()">📦 Backup Data (JSON)</button>
       <button class="btn btn-outline" onclick="document.getElementById('restoreInput').click()">📂 Restore Backup</button>
@@ -1090,11 +1088,19 @@ function catTotal(cat) {
 }
 
 // =========================================================
-// INIT  — called by Firebase auth gate after login
+// INIT
 // =========================================================
 window.onload = function() {
-  // The real init (_initApp) is triggered by onAuthStateChanged after login.
-  // Nothing to do here — login screen is shown by default.
+  populateGradeSelects();
+  setTodayDates();
+  loadFeeConfigUI();
+  loadAcademicSettings();
+  renderDashboard();
+  renderLearners();
+  renderPayments();
+  populateLearnerSelects();
+  populateYearFilters();
+  updateHeaderStats();
 };
 
 function populateGradeSelects() {
@@ -2467,156 +2473,6 @@ function clearAllData() {
 ['editModal','idCardModal','bcViewerModal'].forEach(id => {
   document.getElementById(id).onclick = function(e) { if (e.target === this) closeModal(id); };
 });
-
-// =========================================================
-// FIREBASE AUTH HELPERS
-// =========================================================
-async function doLogin() {
-  const email    = document.getElementById('loginEmail').value.trim();
-  const password = document.getElementById('loginPassword').value;
-  const errEl    = document.getElementById('loginError');
-  const btn      = document.getElementById('loginBtn');
-  errEl.style.display = 'none';
-  if (!email || !password) { showLoginError('Please enter your email and password.'); return; }
-  btn.disabled = true; btn.textContent = 'Signing in…';
-  try {
-    const { auth, signInWithEmailAndPassword } = window._fb;
-    await signInWithEmailAndPassword(auth, email, password);
-    // onAuthStateChanged handles the rest
-  } catch (err) {
-    let msg = 'Login failed. Please check your credentials.';
-    if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') msg = 'Invalid email or password.';
-    if (err.code === 'auth/too-many-requests') msg = 'Too many attempts. Please try again later.';
-    showLoginError(msg);
-  } finally {
-    btn.disabled = false; btn.textContent = '🔐 Sign In';
-  }
-}
-
-function showLoginError(msg) {
-  const el = document.getElementById('loginError');
-  el.textContent = msg; el.style.display = 'block';
-}
-
-async function doLogout() {
-  const { auth, signOut } = window._fb;
-  await signOut(auth);
-}
-
-// =========================================================
-// FIREBASE PERSISTENCE  (replaces localStorage for live data)
-// =========================================================
-async function fbSave(collection_name, id, data) {
-  const { db, doc, setDoc } = window._fb;
-  await setDoc(doc(db, collection_name, id), data);
-}
-
-async function fbDelete(collection_name, id) {
-  const { db, doc, deleteDoc } = window._fb;
-  await deleteDoc(doc(db, collection_name, id));
-}
-
-async function fbLoadAll(collection_name) {
-  const { db, collection, getDocs } = window._fb;
-  const snap = await getDocs(collection(db, collection_name));
-  return snap.docs.map(d => d.data());
-}
-
-async function fbSaveConfig(key, data) {
-  const { db, doc, setDoc } = window._fb;
-  await setDoc(doc(db, 'config', key), data);
-}
-
-async function fbLoadConfig(key, def) {
-  const { db, doc, getDoc } = window._fb;
-  const snap = await getDoc(doc(db, 'config', key));
-  return snap.exists() ? snap.data() : def;
-}
-
-// ── Override persist() to also sync to Firebase ──
-const _origPersist = persist;
-async function persist() {
-  _origPersist();   // keep localStorage as fast local cache
-  // Sync learners
-  for (const l of learners) { await fbSave('learners', l.id, l); }
-  // Sync payments
-  for (const p of payments) { await fbSave('payments', p.id, p); }
-}
-
-// ── Override saveFeeConfig() to sync ──
-const _origSaveFee = saveFeeConfig;
-async function saveFeeConfig() {
-  _origSaveFee();
-  await fbSaveConfig('feeConfig', feeConfig);
-}
-
-// ── Override saveAcademicSettings() to sync ──
-const _origSaveAcad = saveAcademicSettings;
-async function saveAcademicSettings() {
-  _origSaveAcad();
-  await fbSaveConfig('academicSettings', academicSettings);
-}
-
-// ── Override saveExams() to sync ──
-const _origSaveExams = saveExams;
-async function saveExams() {
-  _origSaveExams();
-  for (const e of examRecords) { await fbSave('examRecords', e.id, e); }
-}
-
-// ── deleteLearner & deletePayment patches to also remove from Firebase ──
-const _origDeleteLearner = deleteLearner;
-async function deleteLearner(id) {
-  _origDeleteLearner(id);
-  await fbDelete('learners', id);
-}
-
-const _origDeletePayment = deletePayment;
-async function deletePayment(id) {
-  _origDeletePayment(id);
-  await fbDelete('payments', id);
-}
-
-// =========================================================
-// APP INIT – loads Firebase data then starts UI
-// =========================================================
-window._initApp = async function() {
-  // Load from Firestore and merge into in-memory state (overrides empty localStorage)
-  const [fbLearners, fbPayments, fbExams, fbFee, fbAcad] = await Promise.all([
-    fbLoadAll('learners'),
-    fbLoadAll('payments'),
-    fbLoadAll('examRecords'),
-    fbLoadConfig('feeConfig',  { a:{term:0,exam:0,act:0}, b:{term:0,exam:0,act:0}, c:{term:0,exam:0,act:0} }),
-    fbLoadConfig('academicSettings', { year: new Date().getFullYear(), term: 'Term 1' })
-  ]);
-
-  if (fbLearners.length)  learners         = fbLearners;
-  if (fbPayments.length)  payments         = fbPayments;
-  if (fbExams.length)     examRecords      = fbExams;
-  feeConfig        = fbFee;
-  academicSettings = fbAcad;
-
-  // Seed localStorage cache
-  save('ktps_learners',  learners);
-  save('ktps_payments',  payments);
-  save('ktps_exams',     examRecords);
-  save('ktps_fees',      feeConfig);
-  save('ktps_academic',  academicSettings);
-
-  // Boot UI
-  populateGradeSelects();
-  setTodayDates();
-  loadFeeConfigUI();
-  loadAcademicSettings();
-  renderDashboard();
-  renderLearners();
-  renderPayments();
-  populateLearnerSelects();
-  populateYearFilters();
-  updateHeaderStats();
-};
-
 </script>
-</div><!-- /appRoot -->
 </body>
 </html>
